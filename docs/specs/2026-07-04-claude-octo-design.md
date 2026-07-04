@@ -1,12 +1,15 @@
-# claude-octo — Personal Claude Code Plugin (Design)
+# claude-octo — Portable AI-Agent Workflow Toolkit (Design)
 
 Date: 2026-07-04
 Status: draft for review
 
 ## Goal
 
-A portable, self-contained Claude Code plugin that carries Eduard's complete
-development workflow — plan → implement → test → review → PR — into any project.
+A portable, self-contained workflow toolkit for AI coding agents that carries
+Eduard's complete development workflow — plan → implement → test → review →
+PR — into any project. The core is harness-neutral (open Agent Skills format +
+plain scripts + on-disk state); per-tool adapters handle packaging (see
+Portability).
 It replaces the deprecated per-project setup in `vwd-backend/.claude/` and is
 designed to eliminate five measured time sinks:
 
@@ -73,7 +76,10 @@ claude-octo/
     index.html             # Mission Control — self-contained, polls run state
     serve.sh               # python3 -m http.server wrapper, fixed port + open browser
   terminal/
-    octo-anim.py           # pixel-art octo mascot animation + live status (IMPLEMENTED)
+    octo-anim.py           # one-line braille-wave animation + live status (IMPLEMENTED)
+  adapters/
+    opencode/              # JS plugin shim: tool.execute.before → guard.sh, agents transform
+    install.sh             # symlink skills into ~/.claude/skills + ~/.agents/skills, etc.
   hooks/
     hooks.json             # plugin hook wiring via ${CLAUDE_PLUGIN_ROOT}
     guard.sh               # PreToolUse safety guard
@@ -83,6 +89,24 @@ claude-octo/
   docs/specs/              # this document
   README.md                # install + usage + per-project config reference
 ```
+
+## Portability (verified 2026-07-04 against official docs)
+
+octo is **not** tied to one harness. The layering, from most to least portable:
+
+| Layer | Portability | Basis |
+|---|---|---|
+| Skills (SKILL.md) | **Universal** | Agent Skills is an open standard (agentskills.io, Linux-Foundation-adjacent ecosystem) supported by ~40 tools: Claude Code, OpenCode, Codex CLI, Cursor, Gemini CLI, Goose, Copilot, … Strict spec frontmatter (name + description) keeps us compliant. |
+| Scripts & state (guard.sh, status.json, events.jsonl, lessons, dashboard, octo-anim) | **Universal** | Plain shell/python + JSON files — no harness API at all. |
+| Project rules | **Universal** | `AGENTS.md` is the cross-tool standard (20+ tools); ship AGENTS.md as source of truth, symlink CLAUDE.md → AGENTS.md. |
+| Hook *logic* | **Near-universal** | Guard scripts read JSON on stdin and exit 2 to block — that exact protocol works verbatim in Claude Code (PreToolUse), Codex CLI (PreToolUse, behind a feature flag), and Gemini CLI (BeforeTool). OpenCode needs a ~30-line JS shim (`tool.execute.before` → spawn guard.sh → throw on exit 2). |
+| Hook *wiring* + subagent defs | **Per-tool adapters** | Each harness registers hooks differently; subagent .md formats differ in fields (Cursor reads `.claude/agents/`; OpenCode wants `mode`/`permission` instead of `tools`). Small transform per tool. |
+| Plugin manifest / marketplace | **Claude Code-only veneer** | `.claude-plugin/` is one packaging target among several; `adapters/install.sh` covers the rest (symlinks skills into `~/.claude/skills` and `~/.agents/skills`, which between them cover every major tool). |
+
+Known gaps (from verification): OpenCode does **not** read `.claude/commands/`,
+`.claude/agents/`, or Claude plugin manifests — hence the adapter; it *does*
+read `.claude/skills/` and CLAUDE.md natively. Docs and README speak of "your
+agent harness", naming specific tools only in the install matrix.
 
 ## Agents (9 → 5)
 
@@ -356,9 +380,10 @@ get pinged, which is the actual workflow studio mode promises.
 
 The statusline script remains the lightweight always-on option; Mission
 Control is for build/studio runs. Both read the same state files. A third,
-fun tier already exists: `terminal/octo-anim.py` — a pixel-art octo mascot
-(sine-wave tentacles, blinking eyes) that renders the same `status.json`
-under the animation; `/octo:watch --terminal` runs it instead of the browser
+minimal tier already exists: `terminal/octo-anim.py` — a one-line flowing
+braille wave next to the octo mark, with the same `status.json` rendered
+inline (`🐙 ⠤⢄⣀⡠⠔⠒⠉⠉⠒⠤ build · step 3/7`); no colors, `--plain` for
+emoji-less terminals. `/octo:watch --terminal` runs it instead of the browser
 dashboard. The
 dashboard UI itself is built with the frontend-design skill at implementation
 time — it's the README hero screenshot, treat it accordingly.

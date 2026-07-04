@@ -1,16 +1,17 @@
 #!/usr/bin/env python3
-"""octo mascot — pixel-art terminal animation + live status display.
+"""octo wave — minimal one-line terminal animation + live status.
 
-Zero dependencies (python3 stdlib). Renders a pixel octopus with waving
-tentacles; below it, the current octo run status from .claude/octo/status.json
-if present. Used by /octo:watch and as a friendly foreground while long
-skills run.
+A flowing braille wave (the tentacle ripple) next to the octo mark, followed
+by the current run status from .claude/octo/status.json. One line, no colors,
+zero dependencies.
 
 Usage:
   octo-anim.py               # animate until Ctrl-C
   octo-anim.py --frames 40   # fixed number of frames, then exit
-  octo-anim.py --once        # print a single frame (no ANSI cursor tricks)
-  octo-anim.py --fps 8       # animation speed
+  octo-anim.py --once        # print a single frame
+  octo-anim.py --fps 12      # animation speed
+  octo-anim.py --width 24    # wave width in characters
+  octo-anim.py --plain       # no emoji (pure braille, safest fonts)
 """
 
 import argparse
@@ -21,63 +22,25 @@ import signal
 import sys
 import time
 
-# 256-color palette: char in art -> xterm bg color
-PALETTE = {
-    "P": 205,  # body pink
-    "D": 168,  # shade pink
-    "H": 218,  # highlight
-    "W": 231,  # eye white
-    "B": 16,   # pupil
-    ".": None, # transparent
-}
+DOTBITS = {(0, 0): 0x01, (0, 1): 0x02, (0, 2): 0x04, (0, 3): 0x40,
+           (1, 0): 0x08, (1, 1): 0x10, (1, 2): 0x20, (1, 3): 0x80}
 
-# Body: 16 columns wide. Tentacles are drawn programmatically below it.
-BODY = [
-    "....HHPPPPPP....",
-    "..HHPPPPPPPPPP..",
-    ".HPPPPPPPPPPPPP.",
-    ".PPWWBPPPPWWBPP.",
-    ".PPPPPPPPPPPPPP.",
-    ".PDPPPPPPPPPPDP.",
-    "..DPPPPPPPPPPD..",
-]
-BODY_BLINK_ROW = 3
-BODY_BLINK = ".PPPPPPPPPPPPPP."  # eyes closed
-
-WIDTH = 16
-TENTACLE_ROWS = 4
-TENTACLE_BASES = [2, 4, 6, 9, 11, 13]
-
-RESET = "\x1b[0m"
 HIDE_CUR = "\x1b[?25l"
 SHOW_CUR = "\x1b[?25h"
 
 
-def px(color):
-    if color is None:
-        return "  "
-    return f"\x1b[48;5;{color}m  "
-
-
-def tentacle_grid(t):
-    """Return TENTACLE_ROWS rows of art chars with sine-offset tentacles."""
-    grid = [["."] * WIDTH for _ in range(TENTACLE_ROWS)]
-    for i, base in enumerate(TENTACLE_BASES):
-        for row in range(TENTACLE_ROWS):
-            sway = 1.3 * math.sin(t * 3.0 + row * 0.9 + i * 1.7)
-            x = max(0, min(WIDTH - 1, base + round(sway)))
-            grid[row][x] = "D" if row == TENTACLE_ROWS - 1 else "P"
-    return ["".join(r) for r in grid]
-
-
-def frame_lines(t):
-    body = list(BODY)
-    if int(t * 2) % 8 == 7:  # blink roughly every 4s
-        body[BODY_BLINK_ROW] = BODY_BLINK
-    lines = []
-    for artrow in body + tentacle_grid(t):
-        lines.append("".join(px(PALETTE[c]) for c in artrow) + RESET)
-    return lines
+def wave(phase, chars):
+    """One braille row: a smooth sine wave, `chars` cells wide."""
+    cols, rows = chars * 2, 4
+    line = ""
+    for cx in range(0, cols, 2):
+        bits = 0
+        for dx in range(2):
+            x = cx + dx
+            y = round((rows - 1) / 2 + (rows - 1) / 2 * math.sin(x * 0.35 - phase))
+            bits |= DOTBITS[(dx, y)]
+        line += chr(0x2800 + bits)
+    return line
 
 
 def status_line():
@@ -85,35 +48,32 @@ def status_line():
     try:
         with open(path) as f:
             s = json.load(f)
-        phase = s.get("phase", "?")
-        step = s.get("step", "")
-        activity = s.get("activity", "")
-        parts = [p for p in (phase, step, activity) if p]
-        return "\x1b[38;5;205m◉\x1b[0m " + " · ".join(parts)
+        parts = [p for p in (s.get("phase"), s.get("step"), s.get("activity")) if p]
+        return " · ".join(parts) if parts else "running"
     except (OSError, ValueError):
-        return "\x1b[38;5;244mocto is idle — waiting for a mission\x1b[0m"
+        return "idle — waiting for a mission"
 
 
-def render(t):
-    lines = frame_lines(t)
-    lines.append("")
-    lines.append(status_line())
-    return lines
+def frame(t, width, plain):
+    mark = "~" if plain else "🐙"
+    return f"{mark} {wave(t * 4.0, width)}  {status_line()}"
 
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("--fps", type=float, default=8.0)
+    ap.add_argument("--fps", type=float, default=12.0)
     ap.add_argument("--frames", type=int, default=0, help="0 = until Ctrl-C")
+    ap.add_argument("--width", type=int, default=18, help="wave width in chars")
     ap.add_argument("--once", action="store_true")
+    ap.add_argument("--plain", action="store_true", help="no emoji")
     args = ap.parse_args()
 
     if args.once or not sys.stdout.isatty():
-        print("\n".join(render(0.0)))
+        print(frame(0.0, args.width, args.plain))
         return
 
     def restore(*_):
-        sys.stdout.write(SHOW_CUR + RESET + "\n")
+        sys.stdout.write(SHOW_CUR + "\n")
         sys.stdout.flush()
         sys.exit(0)
 
@@ -121,25 +81,19 @@ def main():
     signal.signal(signal.SIGTERM, restore)
 
     sys.stdout.write(HIDE_CUR)
-    height = len(BODY) + TENTACLE_ROWS + 2
-    first = True
     n = 0
     t0 = time.monotonic()
     try:
         while True:
-            t = time.monotonic() - t0
-            if not first:
-                sys.stdout.write(f"\x1b[{height}A")
-            first = False
-            for line in render(t):
-                sys.stdout.write("\x1b[2K" + line + "\n")
+            line = frame(time.monotonic() - t0, args.width, args.plain)
+            sys.stdout.write("\r\x1b[2K" + line)
             sys.stdout.flush()
             n += 1
             if args.frames and n >= args.frames:
                 break
             time.sleep(1.0 / args.fps)
     finally:
-        sys.stdout.write(SHOW_CUR + RESET)
+        sys.stdout.write(SHOW_CUR + "\n")
         sys.stdout.flush()
 
 
