@@ -80,7 +80,8 @@ from `.claude/octo/lessons/*.md`.
 scope. After one retry, record the failure in the batch summary and continue remaining lanes —
 no silent truncation.
 
-After each completed batch, overwrite `.claude/octo/run/state.json` to update `"lanes"` and
+At dispatch time, write each lane to `.claude/octo/run/state.json` (agent, task, started=now).
+After each completed batch, clear and rewrite lanes in `.claude/octo/run/state.json` and
 append to `.claude/octo/run/events.jsonl`:
 `{"ts": "<ISO>", "type": "batch", "tasks": ["<task-id>", ...], "status": "done|partial"}`.
 
@@ -111,6 +112,10 @@ Update status: `{"phase": "test-fix-loop", "step": 4, "activity": "tests green"}
 Unattended rule: any new ambiguity → choose the most reversible option and append it as `[SAFE]`/`[RISKY]` to the plan's `## Assumptions` — never silently, never by asking.
 
 Run the /octo:review loop; invoke it with the explicit paths of all files the plan's tasks touched (from the plan's per-task file lists); if Step 3 committed work along the way, use `--branch` instead so committed changes are included. The review skill's own 3-iteration cap applies; do not re-implement it here.
+
+After each review pass, append one event per confirmed finding:
+`{"ts":"<ISO>","type":"finding","iteration":<k>,"severity":"<sev>","summary":"<one line>"}`.
+(studio inherits this via composition — add no duplicate text there.)
 
 If review exits at cap with residual confirmed findings: HIGH/CRITICAL residuals → treat as
 blocked (run `bash scripts/notify.sh "octo build" "blocked: unresolved HIGH/CRITICAL findings"`,

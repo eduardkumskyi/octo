@@ -48,6 +48,8 @@ Initialize run state:
 - Append to `.claude/octo/run/events.jsonl`:
   `{"ts":"<ISO>","type":"start","mode":"studio","mission":"<mission>"}`.
 
+Offer to launch /octo:watch (decline is fine; never block on it).
+
 Update status: `{"phase":"contract","step":1,"activity":"contract accepted, run sealed"}`.
 
 ## Phase 2 — Consilium
@@ -109,7 +111,7 @@ For each milestone, in sequence:
 
 Set the milestone to `IN_PROGRESS` in both `board.md` and `.claude/octo/run/state.json`. Append
 to `.claude/octo/run/events.jsonl`:
-`{"ts":"<ISO>","type":"milestone_start","id":"<id>","title":"<title>"}`.
+`{"ts":"<ISO>","type":"milestone","id":"<id>","title":"<title>","status":"IN_PROGRESS"}`.
 
 ### 3b — Build inner loop
 
@@ -125,12 +127,15 @@ or escalated to the consilium if the consequence is hard to reverse — never by
 RISKY + hard-to-reverse goes to consilium instead. All recorded assumptions surface in the
 delivery report.
 
-After each completed batch, overwrite `.claude/octo/run/state.json` to reflect the active lanes
-and append to `.claude/octo/run/events.jsonl`:
+At dispatch time, write each lane to `.claude/octo/run/state.json` (agent, task, started=now).
+After each completed batch, clear and rewrite lanes in `.claude/octo/run/state.json` and
+append to `.claude/octo/run/events.jsonl`:
 `{"ts":"<ISO>","type":"batch","milestone":"<id>","tasks":["<task-id>",...],"status":"done|partial"}`.
 
 If the inner loop exits blocked (tests red after 5 cycles, or HIGH/CRITICAL review residuals
 unresolved): proceed to Step 3c with a `FAIL` signal rather than halting the entire run.
+Inner-loop blocked exits emit no notify and no blocked event — they become the FAIL signal to 3c;
+only run-terminal blocks use the Shared Conventions notify.
 
 ### 3c — Verify, re-plan, or park
 
@@ -139,7 +144,7 @@ Dispatch the **verifier** against the milestone's demo criteria. On `PASS`:
 1. `git commit` all milestone work: `type(scope): <milestone title>`.
 2. Set status `VERIFIED` in both `board.md` and `.claude/octo/run/state.json`.
 3. `bash scripts/notify.sh "octo studio" "milestone verified: <title>"`.
-4. Append: `{"ts":"<ISO>","type":"milestone_verified","id":"<id>","title":"<title>"}` to `.claude/octo/run/events.jsonl`.
+4. Append: `{"ts":"<ISO>","type":"milestone","id":"<id>","title":"<title>","status":"VERIFIED"}` to `.claude/octo/run/events.jsonl`.
 5. Update status.json and advance to the next milestone.
 
 On `FAIL`, `PARTIAL`, or a blocked inner loop: convene the consilium to decide whether and how
@@ -150,7 +155,7 @@ consilium `REJECT`:
 1. Set status `PARKED` in both `board.md` and `.claude/octo/run/state.json`.
 2. Append a decisions.md entry (D\<n\>) capturing the question, ruling, and reason for parking.
 3. `bash scripts/notify.sh "octo studio" "milestone parked: <title>"`.
-4. Append: `{"ts":"<ISO>","type":"milestone_parked","id":"<id>","reason":"<reason>"}` to `.claude/octo/run/events.jsonl`.
+4. Append: `{"ts":"<ISO>","type":"milestone","id":"<id>","title":"<title>","status":"PARKED"}` to `.claude/octo/run/events.jsonl`.
 5. Continue to the next milestone — parked milestones appear in the delivery report.
 
 Update status.json after each milestone: `{"phase":"milestone-loop","step":3,"activity":"milestone <id> <VERIFIED|PARKED>"}`.
