@@ -2,6 +2,7 @@
 """Minimal run-state HTTP server for the Mission Control dashboard."""
 import argparse
 import socketserver
+import urllib.parse
 from http.server import BaseHTTPRequestHandler, HTTPServer
 from pathlib import Path
 
@@ -37,7 +38,7 @@ class Handler(BaseHTTPRequestHandler):
         self._send(400, "text/plain", b"Bad Request")
 
     def do_GET(self) -> None:
-        path = self.path.split("?", 1)[0]  # strip query string
+        path = urllib.parse.unquote(self.path.split("?", 1)[0])  # strip query string and decode
 
         # Reject any path containing ".." before any other processing
         if ".." in path:

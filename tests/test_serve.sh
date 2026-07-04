@@ -11,5 +11,6 @@ SRV=$(cat "$TMP/pid"); sleep 1
 curl -sf "http://127.0.0.1:$PORT/run/state.json" | grep -q "toy mission" || { echo "state not served"; exit 1; }
 curl -sf "http://127.0.0.1:$PORT/" >/dev/null || { echo "index not served"; exit 1; }
 curl -s -o /dev/null -w "%{http_code}" "http://127.0.0.1:$PORT/run/../../secret" | grep -qE "^(400|403|404)$" || { echo "traversal not rejected"; exit 1; }
+curl -s -o /dev/null -w "%{http_code}" "http://127.0.0.1:$PORT/run/%2e%2e/secret" | grep -qE "^(400|403|404)$" || { echo "encoded traversal not rejected"; exit 1; }
 curl -sI "http://127.0.0.1:$PORT/run/state.json" | grep -qi "no-cache" || { echo "missing no-cache"; exit 1; }
 kill $SRV
