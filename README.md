@@ -60,7 +60,7 @@ The dashboard updates live and shows:
 - **Milestone board** — status of every milestone (PENDING / IN_PROGRESS / VERIFIED / PARKED)
 - **Agent lanes** — active implementer, test-engineer, and reviewer threads
 - **Decision feed** — consilium rulings as they happen
-- **Review burndown** — open findings vs. resolved per iteration
+- **Review burndown** — confirmed findings per review iteration
 - **Pace-based ETAs** — honest estimates from completed steps, never wall-clock guesses
 
 <!-- screenshot placeholder: docs/screenshots/mission-control.png -->

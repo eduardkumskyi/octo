@@ -26,16 +26,12 @@ while [[ $# -gt 0 ]]; do
 done
 
 if [[ "$OPEN" -eq 1 ]]; then
-  # Start server briefly in background, open browser, then exec foreground
-  python3 "$PLUGIN_DIR/serve.py" --port "$PORT" &
-  _BG=$!
-  sleep 0.5
   if command -v open &>/dev/null; then
-    open "http://127.0.0.1:$PORT/" 2>/dev/null || true
+    ( sleep 0.5; open "http://127.0.0.1:$PORT/" ) &
   elif command -v xdg-open &>/dev/null; then
-    xdg-open "http://127.0.0.1:$PORT/" 2>/dev/null || true
+    ( sleep 0.5; xdg-open "http://127.0.0.1:$PORT/" ) &
   fi
-  wait "$_BG"
+  exec python3 "$PLUGIN_DIR/serve.py" --port "$PORT"
 else
   exec python3 "$PLUGIN_DIR/serve.py" --port "$PORT"
 fi

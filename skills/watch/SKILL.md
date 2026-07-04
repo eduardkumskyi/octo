@@ -45,7 +45,7 @@ Report the URL to the user immediately after starting:
 The dashboard auto-refreshes. It shows:
 - **Milestone board** — status of every milestone in the current run
 - **Agent lanes** — which implementer/test/review agents are active
-- **Decision feed** — consilium rulings as they are appended to `decisions.md`
+- **Decision feed** — consilium rulings read from events.jsonl (decision events)
 - **Review burndown** — open findings vs. resolved, per iteration
 - **Pace-based ETAs** — honest estimates derived from completed steps; never wall-clock guesses
 

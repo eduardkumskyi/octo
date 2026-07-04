@@ -404,6 +404,24 @@
       color: var(--text-2);
     }
 
+    /* ── Blocked badge / Assumptions chip ───────────────────── */
+    .blocked-badge {
+      font-family: var(--mono);
+      font-size: 10px;
+      padding: 2px 8px;
+      border-radius: 3px;
+      background: #ef4444;
+      color: #fff;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+    }
+
+    .assumptions-chip {
+      font-family: var(--mono);
+      font-size: 10px;
+      color: var(--text-3);
+    }
+
     /* ── Scrollbar ──────────────────────────────────────────── */
     ::-webkit-scrollbar { width: 6px; height: 6px; }
     ::-webkit-scrollbar-track { background: var(--bg); }
@@ -420,6 +438,8 @@
         <span id="mode-badge"></span>
         <span id="phase"></span>
         <span id="updated-ago"></span>
+        <span id="blocked-badge" class="blocked-badge" style="display:none"></span>
+        <span id="assumptions-chip" class="assumptions-chip" style="display:none"></span>
       </div>
     </div>
     <h1 id="mission">waiting for a run…</h1>
@@ -557,17 +577,21 @@
 
   /* ── Render: Header ───────────────────────────────────── */
 
-  function renderHeader(state) {
+  function renderHeader(state, events) {
     var mission = document.getElementById('mission');
     var badge   = document.getElementById('mode-badge');
     var phase   = document.getElementById('phase');
     var ago     = document.getElementById('updated-ago');
+    var blocked = document.getElementById('blocked-badge');
+    var assump  = document.getElementById('assumptions-chip');
 
     if (!state) {
       if (mission) mission.textContent = 'waiting for a run…';
       if (badge)   badge.textContent  = '';
       if (phase)   phase.textContent  = '';
       if (ago)     ago.textContent    = '';
+      if (blocked) { blocked.textContent = ''; blocked.style.display = 'none'; }
+      if (assump)  { assump.textContent  = ''; assump.style.display  = 'none'; }
       return;
     }
 
@@ -575,13 +599,48 @@
     if (badge)   badge.textContent   = state.mode   || '';
     if (phase)   phase.textContent   = state.phase  || '';
     if (ago && state.updated) ago.textContent = 'updated ' + agoStr(state.updated);
+
+    // Blocked badge: show red banner if newest blocked event exists
+    if (blocked) {
+      var blockedEvt = null;
+      var evts = events || [];
+      for (var i = evts.length - 1; i >= 0; i--) {
+        if (evts[i].type === 'blocked') { blockedEvt = evts[i]; break; }
+      }
+      if (blockedEvt) {
+        blocked.textContent = 'BLOCKED: ' + (blockedEvt.reason || '');
+        blocked.style.display = '';
+      } else {
+        blocked.textContent = '';
+        blocked.style.display = 'none';
+      }
+    }
+
+    // Assumptions counter
+    if (assump) {
+      var assumCount = 0;
+      var evts2 = events || [];
+      for (var j = 0; j < evts2.length; j++) {
+        if (evts2[j].type === 'assumption') assumCount++;
+      }
+      if (assumCount > 0) {
+        assump.textContent = assumCount + ' assumption' + (assumCount !== 1 ? 's' : '');
+        assump.style.display = '';
+      } else {
+        assump.textContent = '';
+        assump.style.display = 'none';
+      }
+    }
   }
 
   /* ── Render: Board ────────────────────────────────────── */
 
   function renderBoard(state) {
     if (!state || !state.milestones) {
-      set('board-grid', '<div class="col-empty empty-state">waiting for a run…</div>');
+      var emptyMsg = (state && state.mode === 'build')
+        ? 'build mode — no milestone board'
+        : 'waiting for a run…';
+      set('board-grid', '<div class="col-empty empty-state">' + esc(emptyMsg) + '</div>');
       return;
     }
 
@@ -652,7 +711,9 @@
     }
 
     var html = decisions.map(function (e) {
-      var text = e.text || e.summary || e.id || '';
+      var text = e.question
+        ? (e.id || '') + ' — ' + e.question + ' → ' + (e.ruling || '')
+        : (e.text || e.summary || e.id || '');
       return '<div class="decision-item">'
         + '<span class="dec-ts">' + esc(fmtTime(e.ts)) + '</span>'
         + '<span class="dec-text">' + esc(text) + '</span>'
@@ -664,11 +725,19 @@
 
   /* ── Render: Burndown ─────────────────────────────────── */
 
-  function renderBurndown(events) {
+  function renderBurndown(state, events) {
+    // Iteration label (M13)
+    var iterHtml = '';
+    if (state && state.iteration && state.iteration.k != null && state.iteration.cap != null) {
+      iterHtml = '<div style="font-family:var(--mono);font-size:10px;color:var(--text-3);margin-bottom:8px">'
+        + 'review iteration ' + esc(String(state.iteration.k)) + '/' + esc(String(state.iteration.cap))
+        + '</div>';
+    }
+
     var findings = events.filter(function (e) { return e.type === 'finding'; });
 
     if (!findings.length) {
-      set('burndown-body', '<p class="empty-state">No findings yet</p>');
+      set('burndown-body', iterHtml + '<p class="empty-state">No findings yet</p>');
       return;
     }
 
@@ -691,7 +760,7 @@
         + '</div>';
     }).join('');
 
-    set('burndown-body', '<div class="bar-chart">' + bars + '</div>');
+    set('burndown-body', iterHtml + '<div class="bar-chart">' + bars + '</div>');
   }
 
   /* ── Render: ETA ──────────────────────────────────────── */
@@ -751,13 +820,16 @@
       _state = state;
       fetchEvents(function (events) {
         _events = events;
-        renderHeader(_state);
-        renderBoard(_state);
-        renderLanes(_state);
-        renderDecisions(_events);
-        renderBurndown(_events);
-        renderEta(_state, _events);
-        _busy = false;
+        try {
+          renderHeader(_state, _events);
+          renderBoard(_state);
+          renderLanes(_state);
+          renderDecisions(_events);
+          renderBurndown(_state, _events);
+          renderEta(_state, _events);
+        } finally {
+          _busy = false;
+        }
       });
     });
   }

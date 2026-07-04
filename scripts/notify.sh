@@ -2,6 +2,8 @@
 # octo notify — desktop notification; silent no-op without a notifier. Always exit 0.
 set -uo pipefail
 TITLE=${1:-octo}; MSG=${2:-}
+TITLE=${TITLE//\\/\\\\}; TITLE=${TITLE//\"/\\\"}
+MSG=${MSG//\\/\\\\}; MSG=${MSG//\"/\\\"}
 if command -v osascript >/dev/null 2>&1; then
   osascript -e "display notification \"$MSG\" with title \"$TITLE\"" >/dev/null 2>&1 || true
 elif command -v notify-send >/dev/null 2>&1; then
