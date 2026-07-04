@@ -1,0 +1,92 @@
+---
+name: retro
+description: Session post-mortem: mine the conversation for user corrections, confirmed review findings, and debug root causes; distill them into lesson cards; merge duplicates and prune stale ones.
+argument-hint: ""
+---
+
+## Progress Contract
+
+Register these steps as a native task list at Step 1, before beginning. After each step, update
+`.claude/octo/status.json` with `{"phase": <step-name>, "step": <N>, "activity": <short-string>}`.
+Report progress as "N steps remaining, size class S/M/L" — never wall-clock ETAs.
+
+Steps: (1) mine-session, (2) write-cards, (3) curate.
+
+## Workflow
+
+### Step 1 — Mine session
+
+Scan the conversation history for three signal types:
+
+- **(a) User corrections** — any place the user rejected an output, flagged a mistake, or
+  corrected an assumption. Extract the erroneous pattern and the correct approach.
+- **(b) Confirmed review findings** — findings that survived adversarial verification in any
+  `/octo:review` pass this session. Use the upheld severity and file:line citation.
+- **(c) Debug root causes** — root causes confirmed in any `/octo:debug` run this session,
+  with the evidence chain that confirmed them.
+
+For each signal, draft a candidate lesson: one-line `pattern`, severity, and a brief note on
+how to detect or prevent recurrence. Deduplicate candidates before proceeding.
+
+Print a summary: `"N candidate lessons found (a: X, b: Y, c: Z)."` If zero, exit — no cards
+to write, no curation needed.
+
+Update status: `{"phase": "mine-session", "step": 1, "activity": "candidates identified"}`.
+
+### Step 2 — Write cards
+
+For each candidate lesson, write a card at `.claude/octo/lessons/<kebab-slug>.md`.
+Slug = kebab-case of the `pattern` field. If a card with the same slug already exists,
+update its `date` and `## Example` section instead of creating a duplicate.
+
+```
+---
+pattern: <one-line anti-pattern description>
+severity: low|medium|high
+source: retro
+date: YYYY-MM-DD
+---
+```
+
+Body ≤ 25 lines, two required sections: `## Example` (file:line citation or conversation
+reference) and `## How to catch` (concrete detection guidance).
+
+**Cap — 50 cards per project** (`.claude/octo/lessons/`); **20 global** (`~/.claude/octo/lessons/`).
+Before writing each card, count existing cards. If at cap, run the inline mini-retro in
+Step 3 first, then return here to write.
+
+Update status: `{"phase": "write-cards", "step": 2, "activity": "cards written"}`.
+
+### Step 3 — Curate
+
+Read all cards in `.claude/octo/lessons/`. Perform curator duties:
+
+- **Merge near-duplicates** — cards whose `pattern` fields describe the same anti-pattern.
+  Keep the card with the richer `## Example`; absorb the other's date if it is newer.
+- **Prune outgrown lessons** — cards that described a temporary workaround, a now-fixed
+  framework bug, or a pattern the codebase has since eliminated. Delete them.
+- **Enforce caps** — after merging and pruning, confirm project ≤ 50, global ≤ 20. If still
+  over cap, prune the lowest-severity or oldest cards until within limits.
+- **Enforce card length** — any card body exceeding 25 lines is trimmed to the most essential
+  content.
+
+Print a curation summary: cards added, merged, pruned, and final count.
+
+Update status: `{"phase": "curate", "step": 3, "activity": "curation complete"}`.
+
+---
+
+## When to run
+
+Run `/octo:retro` at the end of any significant session (a session that produced confirmed
+review findings, debug root causes, or user corrections) or immediately after a production
+escape, while the context is still available.
+
+---
+
+## Shared Conventions
+
+- Commits: conventional format `type(scope): brief description` — no AI attribution,
+  no `Co-Authored-By` lines of any kind.
+- Never push directly to protected branches (`main`, `master`, `qa`, `staging`).
+- Never use `--no-verify` or force-push.
