@@ -34,6 +34,9 @@ Other harnesses: `adapters/install.sh` arrives in Plan 4 (symlinks skills into
 |---|---|
 | `/octo:plan` | Explore the codebase and produce an implementation plan with SAFE/RISKY assumptions |
 | `/octo:implement` | Supervised plan execution: implement → test → checkpoint, file-disjoint tasks in parallel |
+| `/octo:build` | Autonomous task mode: plan with an up-front assumption gate, implement with tests in parallel where file-disjoint, run targeted tests until green (max 5 cycles), review until clean (max 3 iterations), full-suite gate per project weight, then offer a PR. One command, no mid-run questions after the gate. |
+| `/octo:studio` | Client mode: one contract sign-off, then the agents run like a studio until delivery - consilium panels decide instead of the user, milestones are atomic and verified, all state lives on disk, and any session can resume the run. Zero questions between sign-off and delivery. |
+| `/octo:watch` | Open Mission Control: a local zero-dependency dashboard showing the active run - milestone board, agent lanes, decision feed, review burndown, and pace-based honest ETAs. --terminal runs the one-line octo wave animation instead. |
 | `/octo:test` | Run only the tests affected by the current diff; full suite with `--all` |
 | `/octo:review` | Multi-lens parallel review loop; findings verified and fixed until clean (max 3 iterations) |
 | `/octo:pr` | Create a pull request with a generated description; falls back to push + compare URL |
@@ -42,7 +45,29 @@ Other harnesses: `adapters/install.sh` arrives in Plan 4 (symlinks skills into
 | `/octo:handoff` | Write `.claude/handoff.md` so any future session can resume from the current state |
 | `/octo:skill` | Author a new skill, agent, or hook into the octo repo or a host project's `.claude/` |
 
-build, studio, Mission Control — Plan 3; adapters — Plan 4
+adapters — Plan 4
+
+## Mission Control
+
+Start a run, then open the dashboard in two commands:
+
+```bash
+/octo:build "your task description"   # or /octo:studio "your mission"
+/octo:watch                           # opens http://127.0.0.1:8437/ in your browser
+```
+
+The dashboard updates live and shows:
+- **Milestone board** — status of every milestone (PENDING / IN_PROGRESS / VERIFIED / PARKED)
+- **Agent lanes** — active implementer, test-engineer, and reviewer threads
+- **Decision feed** — consilium rulings as they happen
+- **Review burndown** — open findings vs. resolved per iteration
+- **Pace-based ETAs** — honest estimates from completed steps, never wall-clock guesses
+
+<!-- screenshot placeholder: docs/screenshots/mission-control.png -->
+
+Both `/octo:build` and `/octo:studio` offer to launch `/octo:watch` at the start of the run —
+accept the offer to observe without polling. Use `--terminal` for a one-line wave animation
+(`terminal/octo-anim.py`) when a browser is not available.
 
 ## Safety guard: what it does NOT do
 
