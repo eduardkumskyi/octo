@@ -1,0 +1,91 @@
+---
+name: test
+description: Run only the tests affected by the current diff, printing which tests were selected and why. Full suite with --all. Reads the project's test command and subset syntax from CLAUDE.md.
+argument-hint: "[scope | --all]"
+---
+
+## Progress Contract
+
+Register these steps as a native task list at Step 1, before running. After each step, update
+`.claude/octo/status.json` with `{"phase": <step-name>, "step": <N>, "activity": <short-string>}`.
+Report progress as "N steps remaining" — never wall-clock ETAs.
+
+Steps: (1) read-config, (2) compute-diff, (3) select-tests, (4) run-tests.
+
+## Workflow
+
+### Step 1 — Read project config
+
+Read the host project's `CLAUDE.md` for:
+
+- `test_command` — command used to run tests.
+- `subset_syntax` — how to pass a file or module subset (e.g. `pytest {files}`).
+- `weight` — `heavy` (suite takes ~5+ minutes) or `light`.
+
+If `CLAUDE.md` is absent or missing a `test_command`:
+
+- State explicitly that no test command was found.
+- Detect from repo artifacts: `pyproject.toml` or `pytest.ini` → `pytest`; `manage.py` →
+  `python manage.py test`; `package.json` → `npm test`; `go.mod` → `go test ./...`;
+  `Cargo.toml` → `cargo test`.
+- Announce what was detected before running.
+
+Update status: `{"phase": "read-config", "step": 1, "activity": "read CLAUDE.md"}`.
+
+### Step 2 — Compute diff
+
+Combine `git diff HEAD` (working tree + index) with commits on the current branch not yet on
+the base branch.
+
+If the combined diff is **empty**:
+- Report: "no changes detected."
+- Suggest re-running with `--all`.
+- Exit without running tests.
+
+If `--all` was passed, skip directly to Step 4.
+
+Update status: `{"phase": "compute-diff", "step": 2, "activity": "diff computed"}`.
+
+### Step 3 — Select tests
+
+Map changed source files to test files using, **in order**:
+
+1. **Explicit rules** in host `CLAUDE.md` (e.g. `test_mapping: {src/foo.py: tests/test_foo.py}`).
+2. **Mirrored paths** — `src/foo/bar.py` → `tests/foo/test_bar.py` (or `bar_test.py`).
+3. **Same-name** — any file named `test_<module>` or `<module>_test` anywhere in the repo.
+4. **Import heuristics** — test files that import the changed module.
+
+**ALWAYS** print the selection and rationale before running:
+
+```
+selected 4 of 812 test files: tests/foo/test_bar.py (mirrored path), tests/test_baz.py (import match)
+```
+
+Silent gaps are forbidden. If a changed file maps to no test file, state that explicitly.
+
+If the selection is empty and `weight: heavy`:
+- Report: "no targeted tests found; run with --all to execute the full suite."
+- Exit.
+
+If the selection is empty and `weight: light`:
+- Report the gap and run the full suite.
+
+Update status: `{"phase": "select-tests", "step": 3, "activity": "selection printed"}`.
+
+### Step 4 — Run tests  ← STOP when heavy + --all
+
+If `weight: heavy` and `--all` was passed, confirm with the user before running the full suite.
+
+Run using the resolved command and `subset_syntax` for the selected files.
+For `--all` (once confirmed on heavy, or immediately on light), omit the file filter.
+
+Update status: `{"phase": "run-tests", "step": 4, "activity": "tests complete"}`.
+
+---
+
+## Shared Conventions
+
+- Commits: conventional format `type(scope): brief description` — no AI attribution,
+  no `Co-Authored-By` lines of any kind.
+- Never push directly to protected branches (`main`, `master`, `qa`, `staging`).
+- Never use `--no-verify` or force-push.
