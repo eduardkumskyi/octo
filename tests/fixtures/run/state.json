@@ -1,0 +1,6 @@
+{"mission":"toy mission","mode":"studio","phase":"milestone 2/3",
+ "milestones":[{"id":"m1","title":"skeleton","status":"VERIFIED"},
+               {"id":"m2","title":"core loop","status":"IN_PROGRESS"},
+               {"id":"m3","title":"polish","status":"PENDING"}],
+ "lanes":[{"agent":"implementer","task":"core loop entity system","started":"2026-07-04T10:00:00Z"}],
+ "iteration":{"k":1,"cap":3},"updated":"2026-07-04T10:05:00Z"}
