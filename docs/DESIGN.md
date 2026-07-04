@@ -388,6 +388,8 @@ dashboard. The
 dashboard UI itself is built with the frontend-design skill at implementation
 time — it's the README hero screenshot, treat it accordingly.
 
+v0.5.0: the browser dashboard was removed in favor of the terminal statusline + wave; the run-state contract is unchanged.
+
 ## Hooks (`hooks/hooks.json`)
 
 | Event | Matcher | Script | Behavior |

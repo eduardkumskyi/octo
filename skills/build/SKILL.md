@@ -16,7 +16,7 @@ Steps: (1) read-context, (2) plan-gate, (3) implement, (4) test-fix-loop,
 
 **State-write gate**: a step has not STARTED until its `state.json` overwrite and
 `events.jsonl` entry are written. Write state FIRST, then do the step's work — never the
-reverse. A growing "updated Xm ago" on the dashboard means you are violating this contract.
+reverse. A growing "updated Xm ago" in the statusline means you are violating this contract.
 
 ## Arguments
 
@@ -44,8 +44,6 @@ Initialize run state:
 
 Create the native task list for this session (all six steps). This is the single source of
 truth for human-visible progress.
-
-Offer to launch `/octo:watch` so the user can observe progress without polling.
 
 Update status: `{"phase": "read-context", "step": 1, "activity": "context read, run state initialized"}`.
 

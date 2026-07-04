@@ -15,7 +15,7 @@ Phases: (1) contract, (2) consilium-setup, (3) milestone-loop, (4) resume, (5) d
 
 **State-write gate**: a step has not STARTED until its `state.json` overwrite and
 `events.jsonl` entry are written. Write state FIRST, then do the step's work — never the
-reverse. A growing "updated Xm ago" on the dashboard means you are violating this contract.
+reverse. A growing "updated Xm ago" in the statusline means you are violating this contract.
 
 Relationship note: build = task / hours / user nearby; studio = mission / days / user absent.
 Accepted interpretation: supervision granularity inside the inner loop is per-batch.
@@ -51,8 +51,6 @@ Initialize run state:
   `{"mode":"studio","mission":"<mission>","phase":"contract","milestones":[],"updated":"<ISO>"}`.
 - Append to `.claude/octo/run/events.jsonl`:
   `{"ts":"<ISO>","type":"start","mode":"studio","mission":"<mission>"}`.
-
-Offer to launch /octo:watch (decline is fine; never block on it).
 
 Update status: `{"phase":"contract","step":1,"activity":"contract accepted, run sealed"}`.
 

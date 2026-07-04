@@ -2,7 +2,7 @@
 
 Portable AI-agent workflow toolkit: plan → implement → test → review-until-clean → PR,
 with a lessons engine that absorbs every bug it sees, an autonomous studio mode,
-and Mission Control progress UI. Harness-neutral core; skills follow the open
+and terminal-first progress UI. Harness-neutral core; skills follow the open
 Agent Skills format.
 
 ## Install (Claude Code)
@@ -48,7 +48,6 @@ and subagent formats are per-tool; skills and scripts are the portable core.
 | `/octo:implement` | Supervised plan execution: implement → test → checkpoint, file-disjoint tasks in parallel |
 | `/octo:build` | Autonomous task mode: plan with an up-front assumption gate, implement with tests in parallel where file-disjoint, run targeted tests until green (max 5 cycles), review until clean (max 3 iterations), full-suite gate per project weight, then offer a PR. One command, no mid-run questions after the gate. |
 | `/octo:studio` | Client mode: one contract sign-off, then the agents run like a studio until delivery - consilium panels decide instead of the user, milestones are atomic and verified, all state lives on disk, and any session can resume the run. Zero questions between sign-off and delivery. |
-| `/octo:watch` | Open Mission Control: a local zero-dependency dashboard showing the active run - milestone board, agent lanes, decision feed, review burndown, and pace-based honest ETAs. --terminal runs the one-line octo wave animation instead. |
 | `/octo:test` | Run only the tests affected by the current diff; full suite with `--all` |
 | `/octo:review` | Multi-lens parallel review loop; findings verified and fixed until clean (max 3 iterations) |
 | `/octo:pr` | Create a pull request with a generated description; falls back to push + compare URL |
@@ -57,36 +56,27 @@ and subagent formats are per-tool; skills and scripts are the portable core.
 | `/octo:handoff` | Write `.claude/handoff.md` so any future session can resume from the current state |
 | `/octo:skill` | Author a new skill, agent, or hook into the octo repo or a host project's `.claude/` |
 
-## Mission Control
+## Watching progress
 
-Start a run, then open the dashboard in two commands:
+The statusline is the passive default — add one snippet to your Claude Code user settings:
 
-```bash
-/octo:build "your task description"   # or /octo:studio "your mission"
-/octo:watch                           # opens http://127.0.0.1:8437/ in your browser
+```json
+"statusLine": {"type": "command", "command": "bash <path-to-octo>/statusline/octo-statusline.sh", "refreshInterval": 3}
 ```
 
-The dashboard updates live and shows:
-- **Milestone board** — status of every milestone (PENDING / IN_PROGRESS / VERIFIED / PARKED)
-- **Agent lanes** — active implementer, test-engineer, and reviewer threads
-- **Decision feed** — consilium rulings as they happen
-- **Review burndown** — confirmed findings per review iteration
-- **Pace-based ETAs** — honest estimates from completed steps, never wall-clock guesses
+For an animated live view, run `python3 <path-to-octo>/terminal/octo-anim.py` in a second
+terminal while a build or studio run is active.
 
-<!-- screenshot placeholder: docs/screenshots/mission-control.png -->
-
-Both `/octo:build` and `/octo:studio` offer to launch `/octo:watch` at the start of the run —
-accept the offer to observe without polling. Use `--terminal` for a one-line wave animation
-(`terminal/octo-anim.py`) when a browser is not available.
+`.claude/octo/run/state.json` and `events.jsonl` are the machine-readable tap if you want to
+build your own view.
 
 ### Running multiple sessions
 
 Run state is per-project (`.claude/octo/run/` inside each project root), so parallel sessions
-in **different projects** never collide — each project has its own dashboard, and `serve.py`
-auto-increments the port (8437→8446) if the default is already in use. Only **one** active
-build or studio run per project is supported: a second run in the same project overwrites the
-first's state. The `/octo:build` Step-1 guard detects a recent `state.json` (under 15 minutes
-old) and surfaces it as a RISKY item before overwriting.
+in **different projects** never collide. Only **one** active build or studio run per project is
+supported: a second run in the same project overwrites the first's state. The `/octo:build`
+Step-1 guard detects a recent `state.json` (under 15 minutes old) and surfaces it as a RISKY
+item before overwriting.
 
 ## Safety guard: what it does NOT do
 
