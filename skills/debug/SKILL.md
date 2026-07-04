@@ -48,6 +48,7 @@ to distinguish surviving candidates from refuted ones.
 
 Continue until exactly one hypothesis remains. If multiple hypotheses survive, dispatch another
 round of targeted investigation (one subagent per surviving candidate) before proceeding.
+Maximum 3 falsification rounds; if multiple hypotheses still survive, stop and present the surviving candidates with their evidence to the user rather than dispatching again.
 
 Print the surviving root cause with the evidence chain that confirms it.
 
@@ -98,7 +99,7 @@ Update status: `{"phase": "lesson", "step": 5, "activity": "lesson card written"
 
 - Commits: conventional format `type(scope): brief description` — no AI attribution,
   no `Co-Authored-By` lines of any kind.
-- Never push directly to protected branches (`main`, `master`, `qa`, `staging`).
+- Never push directly to protected branches (protected branches — see the octo guard's list).
 - Never use `--no-verify` or force-push.
 - Fan-out: all independent-hypothesis subagents go in a **single message** — serial dispatch is
   not acceptable when parallel execution halves elapsed time.

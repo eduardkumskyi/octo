@@ -102,6 +102,6 @@ Update status: `{"phase": "save-and-register", "step": 6, "activity": "plan save
 
 - Commits: conventional format `type(scope): brief description` — no AI attribution,
   no `Co-Authored-By` lines of any kind.
-- Never push directly to protected branches (`main`, `master`, `qa`, `staging`).
+- Never push directly to protected branches (protected branches — see the octo guard's list).
 - Never use `--no-verify` or force-push.
 - Fan-out cap: **10 parallel lanes**; retry once, then report the gap.

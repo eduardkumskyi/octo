@@ -8,6 +8,7 @@ argument-hint: "<what you want>"
 
 Register these steps as a native task list at Step 2, before doing anything else. After each step,
 update `.claude/octo/status.json` with `{"phase": <step-name>, "step": <N>, "activity": <short-string>}`.
+Report progress as N steps remaining, size class S/M/L — never wall-clock ETAs.
 
 Steps: (1) clarify, (2) register-progress, (3) scaffold, (4) validate, (5) commit.
 
@@ -107,5 +108,5 @@ Update status: `{"phase": "commit", "step": 5, "activity": "done"}`.
 
 - Commits: conventional format `type(scope): brief description` — no AI attribution,
   no `Co-Authored-By` lines of any kind.
-- Never push directly to protected branches (`main`, `master`, `qa`, `staging`).
+- Never push directly to protected branches (protected branches — see the octo guard's list).
 - Never use `--no-verify` or force-push.

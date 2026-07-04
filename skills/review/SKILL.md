@@ -124,7 +124,7 @@ Update status: `{"phase": "conclude", "step": 6, "activity": "loop complete"}`.
 
 - Commits: conventional format `type(scope): brief description` — no AI attribution,
   no `Co-Authored-By` lines of any kind.
-- Never push directly to protected branches (`main`, `master`, `qa`, `staging`).
+- Never push directly to protected branches (protected branches — see the octo guard's list).
 - Never use `--no-verify` or force-push.
 - Fan-out: all four reviewer dispatches go in a **single message** — serial dispatch is not
   acceptable when parallel execution halves elapsed time.

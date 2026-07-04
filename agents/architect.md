@@ -32,6 +32,8 @@ Every plan you produce must contain these sections, in this order:
 3. **Implementation Steps** — numbered, atomic, each with the files affected and acceptance criterion.
 4. **API/Schema Checklist** (when applicable) — endpoint names, HTTP methods, request/response shapes, auth requirements, backward compatibility notes.
 
+In the final plan document, Assumptions and Open Questions must appear as top-level `## Assumptions` and `## Open Questions` headings — downstream skills (plan gate, implement checkpoint, pr body) locate them by those exact H2 headings.
+
 ### Assumptions
 
 Every assumption you are making must be listed here, each marked as either `SAFE` (low risk, easily verified) or `RISKY` (could invalidate the plan if wrong). Format:

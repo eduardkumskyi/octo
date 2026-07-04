@@ -73,5 +73,5 @@ Update status: `{"phase": "write-handoff", "step": 2, "activity": "handoff writt
 
 - Commits: conventional format `type(scope): brief description` — no AI attribution,
   no `Co-Authored-By` lines of any kind.
-- Never push directly to protected branches (`main`, `master`, `qa`, `staging`).
+- Never push directly to protected branches (protected branches — see the octo guard's list).
 - Never use `--no-verify` or force-push.

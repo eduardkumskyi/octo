@@ -49,9 +49,10 @@ date: YYYY-MM-DD
 ```
 
 Body ≤ 25 lines, two required sections: `## Example` (file:line citation or conversation
-reference) and `## How to catch` (concrete detection guidance).
+reference — deliberate extension of the card contract for user-correction lessons, which have no file:line) and `## How to catch` (concrete detection guidance).
 
 **Cap — 50 cards per project** (`.claude/octo/lessons/`); **20 global** (`~/.claude/octo/lessons/`).
+Write to `~/.claude/octo/lessons/` only when the lesson is about YOUR habits across projects (e.g. 'I always forget timezone handling'), not about this codebase.
 Before writing each card, count existing cards. If at cap, run the inline mini-retro in
 Step 3 first, then return here to write.
 
@@ -93,5 +94,5 @@ escape, while the context is still available.
 
 - Commits: conventional format `type(scope): brief description` — no AI attribution,
   no `Co-Authored-By` lines of any kind.
-- Never push directly to protected branches (`main`, `master`, `qa`, `staging`).
+- Never push directly to protected branches (protected branches — see the octo guard's list).
 - Never use `--no-verify` or force-push.

@@ -19,6 +19,7 @@ Other harnesses: `adapters/install.sh` arrives in Plan 4 (symlinks skills into
   verification notice (all tested: `bash tests/run.sh`)
 - `statusline/` — one-line live status for your terminal statusline
 - `terminal/octo-anim.py` — the wave: `🐙 ⠤⢄⣀⡠⠔⠒⠉⠉⠒⠤  build · step 3/7`
+
 **Agents:**
 
 - **architect** — planning, system/API design, and codebase exploration
