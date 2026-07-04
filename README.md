@@ -57,8 +57,6 @@ and subagent formats are per-tool; skills and scripts are the portable core.
 | `/octo:handoff` | Write `.claude/handoff.md` so any future session can resume from the current state |
 | `/octo:skill` | Author a new skill, agent, or hook into the octo repo or a host project's `.claude/` |
 
-adapters — Plan 4
-
 ## Mission Control
 
 Start a run, then open the dashboard in two commands:
