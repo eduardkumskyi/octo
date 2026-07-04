@@ -36,3 +36,17 @@ expect_allow 'rm -rf node_modules/foo'
 expect_allow 'psql -c "SELECT 1"'
 # non-Bash tools pass through
 printf '{"tool_name":"Read","tool_input":{}}' | bash "$G"
+
+# extensibility: octo.json branches + guard-extra.sh
+TMP=$(mktemp -d)
+cp -r hooks "$TMP/"
+mkdir -p "$TMP/.claude/hooks"
+echo '{"protected_branches":["release"]}' > "$TMP/.claude/octo.json"
+cat > "$TMP/.claude/hooks/guard-extra.sh" <<'EOF'
+echo "$CMD" | grep -q "forbidden-cmd" && block "project rule"
+EOF
+run_in() { ( cd "$TMP" && payload "$1" | bash hooks/guard.sh 2>/dev/null ); }
+if run_in 'git push origin release'; then echo "octo.json branch not enforced"; exit 1; fi
+if run_in 'forbidden-cmd now'; then echo "guard-extra.sh not sourced"; exit 1; fi
+run_in 'git push origin feat/y' || { echo "extra rules over-blocked"; exit 1; }
+rm -rf "$TMP"

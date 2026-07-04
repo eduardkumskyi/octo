@@ -42,4 +42,10 @@ printf '%s\n' "$CMD" | grep -qiE "\b(DROP\s+TABLE|DROP\s+DATABASE|TRUNCATE|DELET
   && block "destructive SQL via DB CLI"
 printf '%s\n' "$CMD" | grep -qE "manage\.py\s+dbshell" && block "direct DB shell (use ORM/management commands)"
 
+# project-specific rules (host repo): sourced with $CMD and block() available
+if [ -f .claude/hooks/guard-extra.sh ]; then
+  # shellcheck disable=SC1091
+  . .claude/hooks/guard-extra.sh || true
+fi
+
 exit 0
