@@ -73,6 +73,8 @@ Update status: `{"phase": "apply-fixes", "step": 4, "activity": "fixes applied o
 
 ### Step 5 — Write lesson cards
 
+If another iteration will follow (Step 6 loops back), skip this step now — cards are written only on the final pass (or the single --report-only pass).
+
 Write cards **once per run, at exit**, from the final confirmed-findings set — not per
 iteration. For every confirmed finding, create `.claude/octo/lessons/<kebab-slug>.md`:
 
