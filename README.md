@@ -96,5 +96,5 @@ Per-project extras: `.claude/octo.json` (`protected_branches`) and
 
 ## Per-project config
 
-See `docs/specs/2026-07-04-claude-octo-design.md` § "Per-project configuration
+See `docs/DESIGN.md` § "Per-project configuration
 surface".
