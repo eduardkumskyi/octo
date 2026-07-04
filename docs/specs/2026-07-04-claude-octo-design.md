@@ -69,6 +69,9 @@ claude-octo/
     studio/SKILL.md
   statusline/
     octo-statusline.sh     # optional: renders .claude/octo/status.json in the terminal statusline
+  dashboard/
+    index.html             # Mission Control — self-contained, polls run state
+    serve.sh               # python3 -m http.server wrapper, fixed port + open browser
   hooks/
     hooks.json             # plugin hook wiring via ${CLAUDE_PLUGIN_ROOT}
     guard.sh               # PreToolUse safety guard
@@ -277,6 +280,12 @@ review findings that were confirmed, and debugging root causes; distills them
 into lesson cards; merges duplicates and prunes stale ones. Run at the end of
 significant sessions or after a bug escapes to production.
 
+### /octo:watch
+Opens **Mission Control** (see section below): starts the bundled zero-dependency
+local server (python3 stdlib, fixed port) serving the dashboard, and opens the
+browser. `/octo:build` and `/octo:studio` offer to launch it automatically at
+start.
+
 ### /octo:handoff
 Writes `.claude/handoff.md` in the host project: current goal, done/remaining
 tasks, key decisions + assumptions, gotchas discovered, next step. The
@@ -311,6 +320,42 @@ in this codebase.
 
 The compounding effect targets pain point 1 directly: a class of bug only has
 to escape review once — after that it's part of the machine.
+
+## Mission Control (progress UI — pain point 6)
+
+A live browser dashboard for long runs — the CI-dashboard experience for your
+AI studio. Zero dependencies: a single self-contained `index.html` polling
+JSON state, served by a python3-stdlib one-liner. No node, no build step.
+
+**Data model** (written by skills, read by the dashboard):
+- `.claude/octo/run/state.json` — current snapshot: mission, phase, step x/y,
+  active lanes (which subagents are running and on what), loop iteration k/cap.
+- `.claude/octo/run/events.jsonl` — append-only timestamped event log: step
+  started/finished, milestone status changes, findings per review iteration,
+  consilium decisions, lessons written.
+
+**Views:**
+- **Board** — milestone kanban (PENDING / IN_PROGRESS / VERIFIED) with
+  per-milestone progress bars.
+- **Lanes** — live agent activity: each parallel subagent as a lane with its
+  current task and elapsed time (makes pain point 3's parallelism *visible*).
+- **Decision feed** — consilium minutes streaming in as they're ruled, so a
+  curious client can peek at the meeting room without interrupting it.
+- **Review burndown** — findings per iteration trending to zero; the "when
+  will review be done" question becomes a chart.
+- **Honest ETA (the smart part)** — no invented minutes: ETAs are computed
+  from *observed* pace in events.jsonl ("3 milestones in 42m → 2 left ≈ 28m
+  at current pace"), shown with the basis, and only once ≥2 comparable units
+  have completed. Before that: steps remaining + size class.
+
+**Desktop notifications** (macOS `osascript`, Linux `notify-send`): milestone
+verified, run blocked/needs input, delivery ready — so you can walk away and
+get pinged, which is the actual workflow studio mode promises.
+
+The statusline script remains the lightweight always-on option; Mission
+Control is for build/studio runs. Both read the same state files. The
+dashboard UI itself is built with the frontend-design skill at implementation
+time — it's the README hero screenshot, treat it accordingly.
 
 ## Hooks (`hooks/hooks.json`)
 
@@ -347,6 +392,9 @@ Everything project-specific lives in the **host project**, read by the plugin:
   current activity); written by long-running skills, rendered by the optional
   statusline script (opt-in via `statusLine` in user settings; README shows
   the one-liner).
+- `.claude/octo/run/state.json` + `events.jsonl` — Mission Control data
+  (snapshot + append-only event log); written by build/studio steps, read by
+  the dashboard and the pace-based ETA.
 
 ## vwd-backend migration (phase 2, after plugin works)
 
@@ -416,4 +464,6 @@ Each hook: one pass + one block/degrade case. Each skill: one happy path.
 | /octo:studio | toy mission (e.g. CLI game) | contract → milestones VERIFIED → decisions.md populated → delivery report; `--resume` mid-run works |
 | /octo:retro | session with corrections | lesson cards created, duplicates merged |
 | Progress contract | any /octo:build run | task-list checklist visible from step 1; status.json updated per step; loop ticks show k/cap |
+| /octo:watch | during a /octo:build run | dashboard opens, lanes/board/burndown update live; ETA appears only after ≥2 completed units, with its basis shown |
+| Notifications | studio milestone verified | desktop notification fires (osascript/notify-send) |
 | CLAUDE.md absent | /octo:build in bare repo | explicit warning + offer to scaffold, no silent defaults |
