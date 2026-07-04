@@ -1,6 +1,6 @@
 ---
 name: audit
-description: "PR-style pre-merge audit: exhaustive, skeptical, read-only review of the current branch against a base chosen from a question card, across companion repos confirmed by active-work detection. Reviews like a senior engineer trying to block a risky merge — severity-graded findings with concrete failure modes, cross-repo compatibility, must-fix vs safe-to-defer."
+description: "PR-style pre-merge audit: exhaustive, skeptical, read-only review of the current branch against a base chosen from a question card, across companion repos confirmed by active-work detection. Reviews like a senior engineer trying to block a risky merge — severity-graded findings with concrete failure modes, cross-repo compatibility, must-fix vs safe-to-defer; then optionally select findings to fix."
 argument-hint: "[base-branch] [--repos <path>...]"
 ---
 
@@ -15,7 +15,7 @@ Register steps in the native task list named `🐙 <n>/<total> — <step name>`;
 in_progress/completed as you go — the checklist is the user's primary progress view.
 
 Steps: (1) resolve-matrix, (2) per-repo-review, (3) cross-repo-lens, (4) skeptic-verify,
-(5) report.
+(5) report, (6) fix-selection.
 
 ## Arguments
 
@@ -142,7 +142,7 @@ Update status: `{"phase": "skeptic-verify", "step": 4, "activity": "k findings c
 
 Produce the audit report per the **Report Contract** below.
 
-**READ-ONLY**: never apply fixes, never create commits, never modify the working tree.
+Read-only through the report. Nothing is modified unless you select fixes at the final step; pushes are never automatic.
 Confirmed HIGH/CRITICAL findings become lesson-card candidates — follow the same card
 contract as `/octo:review` Step 5 (write `.claude/octo/lessons/<kebab-slug>.md`; same
 50-card cap, same slug/body rules). Do not write cards for MEDIUM/LOW findings unless they
@@ -202,6 +202,31 @@ with a brief rationale for each deferral.
 
 ---
 
+### Step 6 — Post-report fix selection
+
+1. Ask via AskUserQuestion (single question): "What should I fix now?" with options:
+   - "All must-fix items (Recommended)"
+   - "Must-fix + safe-to-defer"
+   - "Let me pick individually"
+   - "Nothing — report only"
+
+2. If "Let me pick individually": present the confirmed findings as multiSelect AskUserQuestion(s), batched up to 4 options per question, up to 4 questions per call (use additional calls if more findings). Option label = finding title + severity; description = the one-line failure mode.
+
+3. Fixing (only what was selected):
+   - Per repo, dispatch the implementer agent with the full list of selected findings for that repo (one dispatch per repo, not one per finding).
+   - Missing-test findings go to the test-engineer agent instead.
+   - After fixes: run targeted tests via /octo:test's selection logic.
+   - Then a focused skeptic-style re-check per fixed finding (reference /octo:review's verification protocol, don't restate).
+   - Report per finding: FIXED (with file:line) or COULDN'T-FIX (with why).
+   - Conventional commit per repo: `fix: address audit findings — <short list>`
+   - Commit only in repos where the user selected fixes; NEVER push automatically.
+
+4. If "Nothing — report only": end exactly as today (no changes made).
+
+Update status: `{"phase": "fix-selection", "step": 6, "activity": "fix selection complete"}`.
+
+---
+
 ## Shared Conventions
 
 - Commits: conventional format `type(scope): brief description` — no AI attribution,
@@ -210,5 +235,4 @@ with a brief rationale for each deferral.
 - Never use `--no-verify` or force-push.
 - Fan-out: all reviewer dispatches for a batch go in a **single message** — serial dispatch
   is not acceptable when parallel execution halves elapsed time.
-- READ-ONLY throughout: the audit skill never modifies the working tree, never commits,
-  never pushes.
+- Read-only through the report. Nothing is modified unless you select fixes at the final step; pushes are never automatic.
