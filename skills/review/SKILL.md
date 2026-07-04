@@ -18,9 +18,9 @@ Steps: (1) resolve-diff, (2) review-fan-out, (3) adversarial-verify, (4) apply-f
 
 - **`--staged`** — diff staged changes only (`git diff --cached`).
 - **`--branch`** — commits on the current branch not yet on the resolved base. Base: `git symbolic-ref refs/remotes/origin/HEAD` (strip to branch name); if unset, `main` if it exists, else `master`. State the chosen base.
-- **`--report-only`** — list confirmed findings; skip the implementer fix step.
+- **`--report-only`** — list confirmed findings; skip fixes. Runs exactly one pass (lenses + skeptics), writes lesson cards, then exits — no iterations.
 - **`<paths>`** — restrict the diff to the listed paths. Mutually exclusive with `--staged` and `--branch`; if combined, error and ask the user to choose.
-- **default (no flags)** — working tree and staged changes combined (`git diff HEAD`).
+- **default (no flags)** — working tree and staged changes combined (`git diff HEAD`). Covers uncommitted work (pre-commit review); this differs intentionally from `/octo:test`, which targets committed code. Use `--branch` to review committed work.
 
 ## Workflow
 
@@ -47,16 +47,23 @@ Update status: `{"phase": "review-fan-out", "step": 2, "activity": "iteration k/
 
 ### Step 3 — Adversarial verification
 
-For each finding from Step 2, dispatch a **fresh skeptic subagent** with one instruction: refute
-this finding. Model scales with stakes — `haiku` for LOW or MEDIUM severity; `inherit` for HIGH
-or CRITICAL (a cheap skeptic must never be the reason a real security bug gets dismissed). Drop
-findings the skeptic successfully refutes. Carry forward only confirmed findings.
+For each finding from Step 2, dispatch a **fresh skeptic subagent** with: (a) the finding
+verbatim (file:line + excerpt) and (b) the surrounding diff hunk or file section. The skeptic
+must return exactly `REFUTED: <reason>` or `UPHELD: <reason>`. **Uncertain ⇒ UPHELD** — the
+skeptic exists to kill clear false positives, not to shed real bugs. Only REFUTED findings are
+dropped; UPHELD findings carry forward.
+
+Model scales with stakes — `haiku` for LOW or MEDIUM severity; `inherit` for HIGH or CRITICAL
+(a cheap skeptic must never be the reason a real security bug gets dismissed).
+
+Finding severity comes from the reviewer agent's rubric (CRITICAL/HIGH/MEDIUM/LOW).
 
 Update status: `{"phase": "adversarial-verify", "step": 3, "activity": "k findings confirmed"}`.
 
 ### Step 4 — Apply fixes  ← STOP if --report-only
 
-If `--report-only`: print confirmed findings with severity and location; skip this step.
+If `--report-only`: print confirmed findings with severity and location; skip the implementer
+dispatch. Proceed to Step 5 then exit — do not return to Step 2.
 
 Otherwise, dispatch the **implementer agent** with the full list of confirmed findings. The
 implementer applies fixes to the working tree. After fixes, recompute the diff on the updated
@@ -66,16 +73,20 @@ Update status: `{"phase": "apply-fixes", "step": 4, "activity": "fixes applied o
 
 ### Step 5 — Write lesson cards
 
-For every confirmed finding, create `.claude/octo/lessons/<kebab-slug>.md`:
+Write cards **once per run, at exit**, from the final confirmed-findings set — not per
+iteration. For every confirmed finding, create `.claude/octo/lessons/<kebab-slug>.md`:
 
 ```
 ---
 pattern: <one-line anti-pattern description>
-severity: low|medium|high
+severity: low|medium|high  # CRITICAL→high
 source: review
 date: YYYY-MM-DD
 ---
 ```
+
+Slug = kebab-case of the card's one-line `pattern`. If a card with the same slug already
+exists, update its `date` and `## Example` section instead of creating a duplicate.
 
 Body ≤ 25 lines, two required sections:
 
@@ -90,13 +101,18 @@ Update status: `{"phase": "write-lessons", "step": 5, "activity": "lesson cards 
 
 ### Step 6 — Iterate or conclude
 
+If `--report-only` was set: exit — Step 4 already directed this path.
+
 If the current pass has **zero confirmed findings**: report the diff is clean and exit.
 
 If this was **iteration 3**: exit. Report any residual confirmed findings honestly — file,
 severity, and a one-line summary for each — so the next pass or human reviewer knows what
 remains.
 
-Otherwise increment the iteration counter and return to Step 2 with the updated diff.
+Otherwise increment the iteration counter. Recompute the diff for the next pass: for
+**default/`--staged`**, use the same scope as originally defined; for **`--branch`**, use
+`git diff <resolved-base>` (working tree against base — captures both the branch's commits and
+uncommitted fixes applied in Step 4). Return to Step 2 with the recomputed diff.
 
 Update status: `{"phase": "conclude", "step": 6, "activity": "loop complete"}`.
 
