@@ -22,6 +22,8 @@ rmdir "$TMP/.claude/skills/octo-plan"
 
 # uninstall removes only our links
 touch "$TMP/.claude/agents/mine.md"
+ln -s /tmp "$TMP/.claude/agents/foreign.md"
 HOME="$TMP" bash adapters/install.sh --uninstall >/dev/null
 [ ! -e "$TMP/.claude/skills/octo-review" ] || { echo "uninstall left link"; exit 1; }
 [ -f "$TMP/.claude/agents/mine.md" ] || { echo "uninstall removed foreign file"; exit 1; }
+[ -L "$TMP/.claude/agents/foreign.md" ] || { echo "uninstall removed foreign symlink"; exit 1; }

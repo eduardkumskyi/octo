@@ -13,12 +13,12 @@ link() {  # link <target> <linkpath>
     echo "skip    $linkpath (symlink to elsewhere)"; return
   fi
   [ -e "$linkpath" ] && { echo "skip    $linkpath (exists, not a symlink)"; return; }
-  ln -s "$target" "$linkpath" && echo "linked  $linkpath"
+  if ln -s "$target" "$linkpath" 2>/dev/null; then echo "linked  $linkpath"; else echo "FAILED  $linkpath (ln error — continuing)"; fi
 }
 
 unlink_ours() {  # unlink_ours <linkpath>
   if [ -L "$1" ] && case "$(readlink "$1")" in "$PLUGIN"/*) true;; *) false;; esac; then
-    rm "$1" && echo "removed $1"
+    if rm "$1" 2>/dev/null; then echo "removed $1"; else echo "FAILED  $1 (rm error — continuing)"; fi
   fi
 }
 
