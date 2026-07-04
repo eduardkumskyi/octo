@@ -16,7 +16,7 @@ Steps: (1) read-context, (2) plan-gate, (3) implement, (4) test-fix-loop,
 
 **State-write gate**: a step has not STARTED until its `state.json` overwrite and
 `events.jsonl` entry are written. Write state FIRST, then do the step's work — never the
-reverse. A growing "updated Xm ago" in the statusline means you are violating this contract.
+reverse. A growing "updated Xm ago" on the task checklist or wave means you are violating this contract.
 
 ## Arguments
 

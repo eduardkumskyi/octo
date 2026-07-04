@@ -29,7 +29,6 @@ and subagent formats are per-tool; skills and scripts are the portable core.
 
 - `hooks/` — safety guard, file-scoped auto-format, compaction context restore,
   verification notice (all tested: `bash tests/run.sh`)
-- `statusline/` — one-line live status for your terminal statusline
 - `terminal/octo-anim.py` — the wave: `🐙 ⠤⢄⣀⡠⠔⠒⠉⠉⠒⠤  build · step 3/7`
 
 **Agents:**
@@ -58,17 +57,14 @@ and subagent formats are per-tool; skills and scripts are the portable core.
 
 ## Watching progress
 
-The statusline is the passive default — add one snippet to your Claude Code user settings:
-
-```json
-"statusLine": {"type": "command", "command": "bash <path-to-octo>/statusline/octo-statusline.sh", "refreshInterval": 3}
-```
+Build and studio register every step in Claude Code's native task list — progress is always
+visible in-session with no setup.
 
 For an animated live view, run `python3 <path-to-octo>/terminal/octo-anim.py` in a second
 terminal while a build or studio run is active.
 
-`.claude/octo/run/state.json` and `events.jsonl` are the machine-readable tap if you want to
-build your own view.
+Machine tap: `.claude/octo/run/state.json` + `events.jsonl` + `.claude/octo/status.json` are
+always written if you want to build your own view.
 
 ### Running multiple sessions
 

@@ -390,6 +390,8 @@ time — it's the README hero screenshot, treat it accordingly.
 
 v0.5.0: the browser dashboard was removed in favor of the terminal statusline + wave; the run-state contract is unchanged.
 
+v0.6.0: statusline removed — it required manual settings; zero-setup principle: the plugin must be fully functional immediately after install. Native task checklist is the default progress surface; status.json remains for the terminal wave.
+
 ## Hooks (`hooks/hooks.json`)
 
 | Event | Matcher | Script | Behavior |
