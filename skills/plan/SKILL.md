@@ -6,7 +6,7 @@ argument-hint: "<task description>"
 
 ## Progress Contract
 
-Register these steps as a task list before doing any work. After each step, update
+Register these steps as a native task list at Step 2, before beginning exploration. After each step, update
 `.claude/octo/status.json` with `{"phase": <step-name>, "step": <N>, "activity": <short-string>}`.
 Report progress as "N steps remaining, size class S/M/L" — never wall-clock ETAs.
 
@@ -88,7 +88,7 @@ Update status: `{"phase": "assumption-gate", "step": 5, "activity": "gate cleare
 
 2. Write the plan to `.claude/plans/YYYY-MM-DD-<slug>.md` using today's date.
 
-3. Register `.claude/plans/` in `.git/info/exclude`: read the file, append the line
+3. Register `.claude/plans/` in `.git/info/exclude`: read the file (create the file if it does not exist), append the line
    `.claude/plans/` **only if it is not already present**. Never modify the project's
    `.gitignore`.
 
