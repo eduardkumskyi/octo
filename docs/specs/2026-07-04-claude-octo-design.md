@@ -1,4 +1,4 @@
-# claude-forge — Personal Claude Code Plugin (Design)
+# claude-octo — Personal Claude Code Plugin (Design)
 
 Date: 2026-07-04
 Status: draft for review
@@ -24,7 +24,7 @@ designed to eliminate five measured time sinks:
 
 ## Contract (refined prompt)
 
-- New git repo at `~/PycharmProjects/claude-forge/`, structured as an
+- New git repo at `~/PycharmProjects/claude-octo/`, structured as an
   installable plugin with its own marketplace file
   (`/plugin marketplace add <repo>` works from GitHub or local path).
 - **Self-contained**: the full dev cycle is covered; superpowers/epsilon become
@@ -32,7 +32,7 @@ designed to eliminate five measured time sinks:
 - **Stack-agnostic**: the plugin carries universal engineering discipline;
   every agent reads the host project's `CLAUDE.md` for stack rules before
   acting. No Django/vwd specifics in the plugin.
-- **Dual-mode**: per task the user chooses `/forge:build` (autonomous full
+- **Dual-mode**: per task the user chooses `/octo:build` (autonomous full
   loop) or individual skills step-by-step.
 - Separately: slim `vwd-backend/.claude/` to only project-specific pieces and
   clean permission cruft (migration section below).
@@ -40,9 +40,9 @@ designed to eliminate five measured time sinks:
 ## Repo layout
 
 ```
-claude-forge/
+claude-octo/
   .claude-plugin/
-    plugin.json            # name "forge", version, author
+    plugin.json            # name "octo", version, author
     marketplace.json       # lists this repo as its own marketplace ("./")
   agents/
     architect.md
@@ -82,7 +82,7 @@ context bloat and makes parallel lens fan-out affordable.
 | `architect` | inherit | read-only | Planning, system/API design, codebase exploration. Every plan ends with `## Assumptions` and `## Open Questions`. Absorbs software-architect + api-designer. |
 | `implementer` | inherit | all | Production code. Discipline: simplicity over cleverness, focused diffs, follow existing patterns, no drive-by refactors. Never writes tests (role separation kept from old setup). |
 | `test-engineer` | inherit | all | Writes/repairs tests following project conventions discovered from CLAUDE.md + existing tests. Knows targeted-test selection (see Test economy). |
-| `reviewer` | inherit | read-only | Single agent, parameterized by lens: `bugs`, `security`, `performance`, `simplicity`. Prompt contains one shared rubric + per-lens checklist (security lens carries the OWASP list, performance lens carries N+1/bulk-op checks, etc.). Inherits the strongest session model deliberately — missed bugs are the #1 pain point; the cheap tier is used for the skeptic pass instead (see /forge:review). |
+| `reviewer` | inherit | read-only | Single agent, parameterized by lens: `bugs`, `security`, `performance`, `simplicity`. Prompt contains one shared rubric + per-lens checklist (security lens carries the OWASP list, performance lens carries N+1/bulk-op checks, etc.). Inherits the strongest session model deliberately — missed bugs are the #1 pain point; the cheap tier is used for the skeptic pass instead (see /octo:review). |
 | `verifier` | haiku | all except Write/Edit | Evidence before "done": runs the app/endpoint/UI (curl, Playwright MCP when available), reports observed behavior vs expected. Absorbs qa-engineer-manual. |
 
 Dropped: `research-engineer` (built-in web search + context7 MCP cover it) and
@@ -94,7 +94,7 @@ All skills are user-invocable with `argument-hint`. Shared conventions:
 conventional commits, **never** any AI/Claude attribution in commits or PRs,
 never push to protected branches, never `--no-verify`.
 
-### /forge:plan `<task>`
+### /octo:plan `<task>`
 Architect agent explores (parallel Explore subagents for disjoint areas of a
 large codebase), then produces a plan: numbered tasks with file paths, each
 independently verifiable. Mandatory sections: `## Assumptions` (every
@@ -105,24 +105,24 @@ the skill adds `.claude/plans/` to `.git/info/exclude` (keeps plans out of
 the repo without touching the project's .gitignore). Referenced by
 /implement and /handoff.
 
-### /forge:implement `[plan-file]`
+### /octo:implement `[plan-file]`
 Supervised mode. Executes the latest (or given) plan task-by-task: implementer
 writes code, test-engineer adds tests for the task, targeted tests run, brief
 report per task, user checkpoint between tasks. File-disjoint tasks are
 dispatched to parallel implementer subagents in one message.
 
-### /forge:build `<task>`
+### /octo:build `<task>`
 Autonomous mode — the whole loop, one command:
-1. Read CLAUDE.md; run /forge:plan logic. **Assumption gate happens here** —
+1. Read CLAUDE.md; run /octo:plan logic. **Assumption gate happens here** —
    all RISKY assumptions are resolved with the user up front, so the rest of
    the loop can run unattended.
 2. Implement with tests, parallelizing file-disjoint tasks.
 3. Targeted tests until green.
-4. /forge:review loop until clean (max 3 iterations, then report residuals).
+4. /octo:review loop until clean (max 3 iterations, then report residuals).
 5. Full-suite/lint final gate (respecting project weight config, below).
-6. Offer /forge:pr.
+6. Offer /octo:pr.
 
-### /forge:test `[scope]`
+### /octo:test `[scope]`
 Test economy, the fix for pain point 2:
 - Default: **targeted selection** — map `git diff` (working tree + branch vs
   base) to test files via project conventions: explicit mapping rules in the
@@ -135,7 +135,7 @@ Test economy, the fix for pain point 2:
   subset, and a `weight: heavy|light` hint — heavy projects skip full-suite
   gates in /build unless explicitly requested.
 
-### /forge:review `[--staged|--branch|<paths>]`
+### /octo:review `[--staged|--branch|<paths>]`
 The fix for pain point 1. Loop:
 1. Fan out reviewer subagents — one per lens (bugs, security, performance,
    simplicity) — **in a single message, in parallel**, over the diff.
@@ -147,14 +147,14 @@ The fix for pain point 1. Loop:
 4. Re-run the loop on the updated diff. Exit when a full pass returns zero
    confirmed findings, or after 3 iterations (report what remains).
 
-### /forge:pr `[base]`
+### /octo:pr `[base]`
 Generalized from the vwd version: detect base branch (explicit arg > repo
 default), verify branch is not protected, run lint/pre-commit if configured,
 push, `gh pr create` with description generated from commits + diff.
 PR body always includes `## Assumptions` (carried from the plan) — pain
 point 5's last line of defense. No AI attribution, ever.
 
-### /forge:debug `<bug description>`
+### /octo:debug `<bug description>`
 Systematic root-cause loop — no fix without a confirmed cause and a repro:
 1. **Reproduce first**: build a minimal repro, ideally as a failing test.
 2. Form ranked hypotheses; investigate independent hypotheses with parallel
@@ -166,19 +166,19 @@ Systematic root-cause loop — no fix without a confirmed cause and a repro:
 5. Record a lesson (see Lessons engine) so the same class of bug is caught at
    review time next time.
 
-### /forge:skill `<what you want>`
-Meta-skill: author new skills, agents, or hooks — either into the forge repo
+### /octo:skill `<what you want>`
+Meta-skill: author new skills, agents, or hooks — either into the octo repo
 itself or into a host project's `.claude/`. Knows current frontmatter formats,
 hook events, and plugin layout; scaffolds the artifact, dry-runs it, and (for
-forge additions) commits in the plugin repo. The plugin extends itself.
+octo additions) commits in the plugin repo. The plugin extends itself.
 
-### /forge:retro
+### /octo:retro
 Post-mortem for the session: mines the conversation for user corrections,
 review findings that were confirmed, and debugging root causes; distills them
 into lesson cards; merges duplicates and prunes stale ones. Run at the end of
 significant sessions or after a bug escapes to production.
 
-### /forge:handoff
+### /octo:handoff
 Writes `.claude/handoff.md` in the host project: current goal, done/remaining
 tasks, key decisions + assumptions, gotchas discovered, next step. The
 context-restore hook points at this file after compaction; new sessions can
@@ -187,18 +187,18 @@ start with "read the handoff".
 ## Lessons engine (the differentiator)
 
 **Every bug leaves a scar; the plugin remembers.** Most review tooling starts
-every review from zero. Forge accumulates *project-specific* failure knowledge
+every review from zero. Octo accumulates *project-specific* failure knowledge
 and feeds it back into every future plan, implementation, and review — the
 review checklist is literally generated from the bugs that actually happened
 in this codebase.
 
-- **Storage**: `.claude/forge/lessons/*.md` in the host project — small cards:
+- **Storage**: `.claude/octo/lessons/*.md` in the host project — small cards:
   the failure pattern, a real example (file:line at time of writing), and how
-  to catch it. Optional `~/.claude/forge/lessons/` for cross-project habits
-  (e.g. "I always forget timezone handling").
-- **Writers**: `/forge:review` (every finding that survives adversarial
-  verification becomes a lesson candidate), `/forge:debug` (every root cause),
-  `/forge:retro` (user corrections mined from the session; also the curator —
+  to catch it. Optional `~/.claude/octo/lessons/` for cross-project habits
+  (e.g. "I always octot timezone handling").
+- **Writers**: `/octo:review` (every finding that survives adversarial
+  verification becomes a lesson candidate), `/octo:debug` (every root cause),
+  `/octo:retro` (user corrections mined from the session; also the curator —
   dedups, merges, prunes).
 - **Readers**: `reviewer` lenses load matching lessons before reviewing (your
   bug history becomes the checklist), `implementer` loads them before writing
@@ -215,7 +215,7 @@ to escape review once — after that it's part of the machine.
 
 | Event | Matcher | Script | Behavior |
 |---|---|---|---|
-| PreToolUse | `Bash` | `guard.sh` | Blocks (exit 2): push to protected branches, force-push, `--no-verify`, `git reset --hard`, `rm -rf` on root/cwd/src, and destructive SQL passed to a DB CLI (`psql|mysql|sqlite3 … -c/-e` or via `docker exec` containing `DROP TABLE|DROP DATABASE|TRUNCATE|DELETE FROM`). Protected branches = `main master staging production qa develop` ∪ repo default branch, overridable via `.claude/forge.json`. After built-in checks it sources `.claude/hooks/guard-extra.sh` if the host project has one — this is how vwd keeps its AWS-profile and manage.py rules. |
+| PreToolUse | `Bash` | `guard.sh` | Blocks (exit 2): push to protected branches, force-push, `--no-verify`, `git reset --hard`, `rm -rf` on root/cwd/src, and destructive SQL passed to a DB CLI (`psql|mysql|sqlite3 … -c/-e` or via `docker exec` containing `DROP TABLE|DROP DATABASE|TRUNCATE|DELETE FROM`). Protected branches = `main master staging production qa develop` ∪ repo default branch, overridable via `.claude/octo.json`. After built-in checks it sources `.claude/hooks/guard-extra.sh` if the host project has one — this is how vwd keeps its AWS-profile and manage.py rules. |
 | PostToolUse | `Edit\|Write` | `auto-format.sh` | Formats **only the edited file** if a formatter is detected (ruff → pyproject/ruff.toml; prettier → package.json; gofmt; rustfmt). Fast, file-scoped, keeps diffs clean before review. Trade-off noted: an external format can occasionally invalidate the next Edit's old_string; accepted, standard pattern. |
 | SessionStart | `compact\|resume` | `context-restore.sh` | Fix for pain point 4 — the old `on-compact.sh` was never wired. Re-injects: current branch, dirty files, last 5 commits, critical rules (no protected-branch push, no --no-verify), and the first 30 lines of `.claude/handoff.md` if present. |
 | Stop | — | `verify-done.sh` | Non-blocking notice: if source files were modified this session but the transcript shows no test/lint run, emit a one-line reminder. Deliberately gentle — a hard block here causes more friction than it saves. |
@@ -226,10 +226,10 @@ Everything project-specific lives in the **host project**, read by the plugin:
 
 - `CLAUDE.md` — stack rules, test command + subset syntax + weight, review
   no-gos, protected branches if unusual.
-- `.claude/forge.json` (optional) — protected-branch override list.
+- `.claude/octo.json` (optional) — protected-branch override list.
 - `.claude/hooks/guard-extra.sh` (optional) — extra PreToolUse rules.
-- `.claude/handoff.md` — written by /forge:handoff, read by context-restore.
-- `.claude/forge/lessons/` — written by /review, /debug, /retro; read by
+- `.claude/handoff.md` — written by /octo:handoff, read by context-restore.
+- `.claude/octo/lessons/` — written by /review, /debug, /retro; read by
   reviewer, implementer, architect.
 
 ## vwd-backend migration (phase 2, after plugin works)
@@ -247,14 +247,14 @@ Everything project-specific lives in the **host project**, read by the plugin:
 
 ## Recommendations outside the plugin
 
-- **Context bloat**: with forge self-contained, disable superpowers, epsilon,
+- **Context bloat**: with octo self-contained, disable superpowers, epsilon,
   and epsilon-dev (`/plugin`) — their skill/agent lists consume a meaningful
   slice of every session's context window, which feeds the context-decay
   problem. Re-enable selectively if missed.
 - **Keep**: context7 (docs lookup), Playwright MCP (verifier uses it).
 - **Use built-ins instead of custom**: `/code-review ultra` for deep pre-merge
   reviews of big branches; native plan mode for quick planning when the full
-  /forge:plan ceremony is overkill.
+  /octo:plan ceremony is overkill.
 - **Parallel sessions**: for independent tasks, use worktree-isolated
   subagents (already available via Agent tool `isolation: "worktree"`) rather
   than serializing in one session.
