@@ -32,8 +32,9 @@ designed to eliminate five measured time sinks:
 - **Stack-agnostic**: the plugin carries universal engineering discipline;
   every agent reads the host project's `CLAUDE.md` for stack rules before
   acting. No Django/vwd specifics in the plugin.
-- **Dual-mode**: per task the user chooses `/octo:build` (autonomous full
-  loop) or individual skills step-by-step.
+- **Tri-mode**: per task the user chooses individual skills (supervised),
+  `/octo:build` (autonomous task, hours), or `/octo:studio` (autonomous
+  mission, days — one sign-off, agents decide via consilium).
 - Separately: slim `vwd-backend/.claude/` to only project-specific pieces and
   clean permission cruft (migration section below).
 
@@ -56,8 +57,12 @@ claude-octo/
     build/SKILL.md
     test/SKILL.md
     review/SKILL.md
+    debug/SKILL.md
     pr/SKILL.md
     handoff/SKILL.md
+    retro/SKILL.md
+    skill/SKILL.md
+    studio/SKILL.md
   hooks/
     hooks.json             # plugin hook wiring via ${CLAUDE_PLUGIN_ROOT}
     guard.sh               # PreToolUse safety guard
@@ -154,6 +159,47 @@ push, `gh pr create` with description generated from commits + diff.
 PR body always includes `## Assumptions` (carried from the plan) — pain
 point 5's last line of defense. No AI attribution, ever.
 
+### /octo:studio `<mission>` — client mode (end-to-end, zero confirmations)
+For big, multi-day missions ("build a game") where the user is a *client*,
+not a collaborator: one sign-off at the start, then the agents operate like a
+studio — consulting each other instead of the user — until the result meets
+acceptance criteria.
+
+1. **Contract phase (the only confirmation).** The architect interviews the
+   user once, deeply: goal, acceptance criteria ("done means…"), taste
+   preferences, hard constraints, and — critically — an explicit **delegation
+   of decision authority** ("all decisions not listed here are the studio's
+   to make"). Optional budget/time limits. Written to
+   `.claude/octo/run/contract.md`. User accepts → no further questions, ever.
+2. **Consilium instead of the user.** Wherever other skills would stop and
+   ask (RISKY assumptions, design forks, trade-offs), studio mode convenes a
+   decision panel: three agents argue from fixed seats — *client advocate*
+   (what would the client want, per the contract), *pragmatist* (simplest
+   thing that ships), *risk* (what breaks later) — dispatched in parallel,
+   then a judge agent rules. Decision + votes + rationale are appended to
+   `.claude/octo/run/decisions.md`. The client reads the minutes at delivery,
+   not during.
+3. **Milestone loop.** The mission is decomposed into demoable milestones on
+   a board (`.claude/octo/run/board.md`). Per milestone: plan → parallel
+   implement+test (file-disjoint fan-out) → targeted tests → review loop
+   until clean → verifier actually runs/plays the artifact against the
+   milestone's demo criteria. Journal updated after every milestone.
+4. **Built to survive days.** All state lives on disk (contract, board,
+   decisions, journal) — any fresh session resumes with
+   `/octo:studio --resume`, and the context-restore hook surfaces the active
+   run after every compaction. A studio run is interruptible by design; it
+   never depends on one session staying alive.
+5. **Delivery.** Final acceptance pass by the verifier against the contract's
+   criteria, then a delivery report: what was built, how to run it, the
+   decision minutes, known limitations. The client's next input is the first
+   one since sign-off: accept, or file change requests (which start a new,
+   smaller studio run).
+
+Relationship to /octo:build: build is autonomous for a *task* (hours,
+assumption gate up front, user nearby); studio is autonomous for a *mission*
+(days, decision authority delegated, user absent). Studio composes the same
+machinery — plan/review/test/debug/lessons all apply per milestone.
+
 ### /octo:debug `<bug description>`
 Systematic root-cause loop — no fix without a confirmed cause and a repro:
 1. **Reproduce first**: build a minimal repro, ideally as a failing test.
@@ -195,7 +241,7 @@ in this codebase.
 - **Storage**: `.claude/octo/lessons/*.md` in the host project — small cards:
   the failure pattern, a real example (file:line at time of writing), and how
   to catch it. Optional `~/.claude/octo/lessons/` for cross-project habits
-  (e.g. "I always octot timezone handling").
+  (e.g. "I always forget timezone handling").
 - **Writers**: `/octo:review` (every finding that survives adversarial
   verification becomes a lesson candidate), `/octo:debug` (every root cause),
   `/octo:retro` (user corrections mined from the session; also the curator —
@@ -271,8 +317,8 @@ Everything project-specific lives in the **host project**, read by the plugin:
 2. Hooks (guard, auto-format, context-restore, verify-done) + hooks.json.
 3. Agents (architect, implementer, test-engineer, reviewer, verifier).
 4. Skills (plan, implement, test, review, debug, pr, handoff, retro, skill,
-   build — build last, it composes the others). Lessons engine lands with
-   review/debug/retro.
+   build, studio — build and studio last, they compose the others). Lessons
+   engine lands with review/debug/retro.
 5. Install into a scratch project; smoke-test each hook and skill.
 6. Install into vwd-backend; run migration (slim .claude, guard-extra.sh,
    CLAUDE.md updates).
