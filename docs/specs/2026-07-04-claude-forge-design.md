@@ -154,11 +154,62 @@ push, `gh pr create` with description generated from commits + diff.
 PR body always includes `## Assumptions` (carried from the plan) — pain
 point 5's last line of defense. No AI attribution, ever.
 
+### /forge:debug `<bug description>`
+Systematic root-cause loop — no fix without a confirmed cause and a repro:
+1. **Reproduce first**: build a minimal repro, ideally as a failing test.
+2. Form ranked hypotheses; investigate independent hypotheses with parallel
+   subagents (one message, one subagent per hypothesis).
+3. Falsify with evidence (instrumentation, bisect, logs) until one hypothesis
+   survives.
+4. Fix the root cause, not the symptom; the repro test stays as a regression
+   test.
+5. Record a lesson (see Lessons engine) so the same class of bug is caught at
+   review time next time.
+
+### /forge:skill `<what you want>`
+Meta-skill: author new skills, agents, or hooks — either into the forge repo
+itself or into a host project's `.claude/`. Knows current frontmatter formats,
+hook events, and plugin layout; scaffolds the artifact, dry-runs it, and (for
+forge additions) commits in the plugin repo. The plugin extends itself.
+
+### /forge:retro
+Post-mortem for the session: mines the conversation for user corrections,
+review findings that were confirmed, and debugging root causes; distills them
+into lesson cards; merges duplicates and prunes stale ones. Run at the end of
+significant sessions or after a bug escapes to production.
+
 ### /forge:handoff
 Writes `.claude/handoff.md` in the host project: current goal, done/remaining
 tasks, key decisions + assumptions, gotchas discovered, next step. The
 context-restore hook points at this file after compaction; new sessions can
 start with "read the handoff".
+
+## Lessons engine (the differentiator)
+
+**Every bug leaves a scar; the plugin remembers.** Most review tooling starts
+every review from zero. Forge accumulates *project-specific* failure knowledge
+and feeds it back into every future plan, implementation, and review — the
+review checklist is literally generated from the bugs that actually happened
+in this codebase.
+
+- **Storage**: `.claude/forge/lessons/*.md` in the host project — small cards:
+  the failure pattern, a real example (file:line at time of writing), and how
+  to catch it. Optional `~/.claude/forge/lessons/` for cross-project habits
+  (e.g. "I always forget timezone handling").
+- **Writers**: `/forge:review` (every finding that survives adversarial
+  verification becomes a lesson candidate), `/forge:debug` (every root cause),
+  `/forge:retro` (user corrections mined from the session; also the curator —
+  dedups, merges, prunes).
+- **Readers**: `reviewer` lenses load matching lessons before reviewing (your
+  bug history becomes the checklist), `implementer` loads them before writing
+  (known failure patterns avoided up front), `architect` at planning time.
+- **Curation over accumulation**: lessons are capped and card-sized; /retro
+  merges near-duplicates and deletes lessons the codebase has outgrown. A
+  lessons folder that grows unbounded is context bloat — the thing this
+  plugin exists to fight.
+
+The compounding effect targets pain point 1 directly: a class of bug only has
+to escape review once — after that it's part of the machine.
 
 ## Hooks (`hooks/hooks.json`)
 
@@ -178,6 +229,8 @@ Everything project-specific lives in the **host project**, read by the plugin:
 - `.claude/forge.json` (optional) — protected-branch override list.
 - `.claude/hooks/guard-extra.sh` (optional) — extra PreToolUse rules.
 - `.claude/handoff.md` — written by /forge:handoff, read by context-restore.
+- `.claude/forge/lessons/` — written by /review, /debug, /retro; read by
+  reviewer, implementer, architect.
 
 ## vwd-backend migration (phase 2, after plugin works)
 
@@ -217,8 +270,9 @@ Everything project-specific lives in the **host project**, read by the plugin:
 1. Scaffold repo: plugin.json, marketplace.json, README.
 2. Hooks (guard, auto-format, context-restore, verify-done) + hooks.json.
 3. Agents (architect, implementer, test-engineer, reviewer, verifier).
-4. Skills (plan, implement, test, review, pr, handoff, build — build last,
-   it composes the others).
+4. Skills (plan, implement, test, review, debug, pr, handoff, retro, skill,
+   build — build last, it composes the others). Lessons engine lands with
+   review/debug/retro.
 5. Install into a scratch project; smoke-test each hook and skill.
 6. Install into vwd-backend; run migration (slim .claude, guard-extra.sh,
    CLAUDE.md updates).
