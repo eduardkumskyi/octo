@@ -72,6 +72,8 @@ claude-octo/
   dashboard/
     index.html             # Mission Control — self-contained, polls run state
     serve.sh               # python3 -m http.server wrapper, fixed port + open browser
+  terminal/
+    octo-anim.py           # pixel-art octo mascot animation + live status (IMPLEMENTED)
   hooks/
     hooks.json             # plugin hook wiring via ${CLAUDE_PLUGIN_ROOT}
     guard.sh               # PreToolUse safety guard
@@ -353,7 +355,11 @@ verified, run blocked/needs input, delivery ready — so you can walk away and
 get pinged, which is the actual workflow studio mode promises.
 
 The statusline script remains the lightweight always-on option; Mission
-Control is for build/studio runs. Both read the same state files. The
+Control is for build/studio runs. Both read the same state files. A third,
+fun tier already exists: `terminal/octo-anim.py` — a pixel-art octo mascot
+(sine-wave tentacles, blinking eyes) that renders the same `status.json`
+under the animation; `/octo:watch --terminal` runs it instead of the browser
+dashboard. The
 dashboard UI itself is built with the frontend-design skill at implementation
 time — it's the README hero screenshot, treat it accordingly.
 
