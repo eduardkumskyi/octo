@@ -33,7 +33,7 @@ covering six topics, in this order:
 5. **Delegation** — record this clause verbatim: *"All decisions not listed above are the studio's to make."*
 6. **Limits** — optional: time box, cost ceiling, maximum milestone count.
 
-Write `.claude/octo/studio/contract.md` with six top-level sections matching those headings:
+Write `.claude/octo/run/contract.md` with six top-level sections matching those headings:
 Mission / Acceptance Criteria / Preferences / Constraints / Delegation / Limits.
 
 Present the draft to the client. On acceptance, the run is sealed:
@@ -43,9 +43,9 @@ Present the draft to the client. On acceptance, the run is sealed:
 
 Initialize run state:
 
-- Write `.claude/octo/studio/state.json`:
+- Write `.claude/octo/run/state.json`:
   `{"mode":"studio","mission":"<mission>","phase":"contract","milestones":[],"updated":"<ISO>"}`.
-- Append to `.claude/octo/events.jsonl`:
+- Append to `.claude/octo/run/events.jsonl`:
   `{"ts":"<ISO>","type":"start","mode":"studio","mission":"<mission>"}`.
 
 Update status: `{"phase":"contract","step":1,"activity":"contract accepted, run sealed"}`.
@@ -68,7 +68,7 @@ the architect rules on the merits of the arguments, not by majority count. The r
 `ACCEPT`, `ACCEPT WITH CHANGES`, or `REJECT`. For anything other than a plain `ACCEPT`, the
 architect must list the specific conditions or blockers.
 
-Append every decision to `.claude/octo/studio/decisions.md`:
+Append every decision to `.claude/octo/run/decisions.md`:
 
 ```
 ## D<n> — <question>
@@ -83,10 +83,10 @@ Rationale: <architect's reasoning>
 Date: <ISO date>
 ```
 
-Append to `.claude/octo/events.jsonl`:
+Append to `.claude/octo/run/events.jsonl`:
 `{"ts":"<ISO>","type":"decision","id":"D<n>","question":"<question>","ruling":"<ruling>"}`.
 
-Initialize `.claude/octo/studio/decisions.md` (empty header) before the first milestone starts
+Initialize `.claude/octo/run/decisions.md` (empty header) before the first milestone starts
 so the file is always present and appendable.
 
 Update status: `{"phase":"consilium-setup","step":2,"activity":"decisions log initialized"}`.
@@ -94,18 +94,21 @@ Update status: `{"phase":"consilium-setup","step":2,"activity":"decisions log in
 ## Phase 3 — Milestone loop
 
 **Decompose** the mission into demoable milestones — each must produce a runnable, observable
-artifact that the verifier can exercise. Write `.claude/octo/studio/board.md` (a markdown status
-table: `| ID | Title | Status |`) and update `state.json` with the full milestone list, each
-at status `PENDING`.
+artifact that the verifier can exercise. Write `.claude/octo/run/board.md` (a markdown status
+table: `| ID | Title | Status |`) and update `.claude/octo/run/state.json` with the full
+milestone list, each at status `PENDING`.
 
 **Sync rule**: `board.md` and `state.json` must reflect the same status for every milestone at
-every transition. Never update one without updating the other.
+every transition. Write order: state.json first, then board.md. On resume, if the two disagree,
+state.json is authoritative — rewrite board.md from it and log a journal event. If state.json is
+missing while board.md exists, that is corrupt state: halt and report.
 
 For each milestone, in sequence:
 
 ### 3a — Start the milestone
 
-Set the milestone to `IN_PROGRESS` in both `board.md` and `state.json`. Append to events.jsonl:
+Set the milestone to `IN_PROGRESS` in both `board.md` and `.claude/octo/run/state.json`. Append
+to `.claude/octo/run/events.jsonl`:
 `{"ts":"<ISO>","type":"milestone_start","id":"<id>","title":"<title>"}`.
 
 ### 3b — Build inner loop
@@ -113,11 +116,17 @@ Set the milestone to `IN_PROGRESS` in both `board.md` and `state.json`. Append t
 Run `/octo:build` Steps 3–5 for this milestone's scope — implement with paired tests, targeted
 test loop (max 5 cycles), and review until clean (max 3 iterations). The unattended rule,
 residuals policy, and terminal blocked-event protocol from the build skill apply in full here;
-do not restate that detail, apply it. Any new ambiguity during this loop is resolved by the
-most reversible option (recorded as `[SAFE]` or `[RISKY]` in the plan), or escalated to the
-consilium if the consequence is hard to reverse — never by asking the client.
+do not restate that detail, apply it; and suppress build's own `octo build` notify and blocked
+event on that path — studio emits its own notifications and events with the `octo studio` label.
 
-After each completed batch, overwrite `state.json` to reflect the active lanes and append:
+Any new ambiguity during this loop is resolved by the most reversible option (recorded as an
+`{"type": "assumption", "label": "SAFE|RISKY", ...}` event in `.claude/octo/run/events.jsonl`),
+or escalated to the consilium if the consequence is hard to reverse — never by asking the client.
+RISKY + hard-to-reverse goes to consilium instead. All recorded assumptions surface in the
+delivery report.
+
+After each completed batch, overwrite `.claude/octo/run/state.json` to reflect the active lanes
+and append to `.claude/octo/run/events.jsonl`:
 `{"ts":"<ISO>","type":"batch","milestone":"<id>","tasks":["<task-id>",...],"status":"done|partial"}`.
 
 If the inner loop exits blocked (tests red after 5 cycles, or HIGH/CRITICAL review residuals
@@ -128,9 +137,9 @@ unresolved): proceed to Step 3c with a `FAIL` signal rather than halting the ent
 Dispatch the **verifier** against the milestone's demo criteria. On `PASS`:
 
 1. `git commit` all milestone work: `type(scope): <milestone title>`.
-2. Set status `VERIFIED` in both `board.md` and `state.json`.
+2. Set status `VERIFIED` in both `board.md` and `.claude/octo/run/state.json`.
 3. `bash scripts/notify.sh "octo studio" "milestone verified: <title>"`.
-4. Append: `{"ts":"<ISO>","type":"milestone_verified","id":"<id>","title":"<title>"}`.
+4. Append: `{"ts":"<ISO>","type":"milestone_verified","id":"<id>","title":"<title>"}` to `.claude/octo/run/events.jsonl`.
 5. Update status.json and advance to the next milestone.
 
 On `FAIL`, `PARTIAL`, or a blocked inner loop: convene the consilium to decide whether and how
@@ -138,10 +147,10 @@ to re-plan. If the ruling is `ACCEPT` or `ACCEPT WITH CHANGES`, apply the re-pla
 from Step 3b — **maximum 2 re-plans per milestone total**. After 2 failed re-plans, or on a
 consilium `REJECT`:
 
-1. Set status `PARKED` in both `board.md` and `state.json`.
+1. Set status `PARKED` in both `board.md` and `.claude/octo/run/state.json`.
 2. Append a decisions.md entry (D\<n\>) capturing the question, ruling, and reason for parking.
 3. `bash scripts/notify.sh "octo studio" "milestone parked: <title>"`.
-4. Append: `{"ts":"<ISO>","type":"milestone_parked","id":"<id>","reason":"<reason>"}`.
+4. Append: `{"ts":"<ISO>","type":"milestone_parked","id":"<id>","reason":"<reason>"}` to `.claude/octo/run/events.jsonl`.
 5. Continue to the next milestone — parked milestones appear in the delivery report.
 
 Update status.json after each milestone: `{"phase":"milestone-loop","step":3,"activity":"milestone <id> <VERIFIED|PARKED>"}`.
@@ -150,7 +159,7 @@ Update status.json after each milestone: `{"phase":"milestone-loop","step":3,"ac
 
 When invoked with `--resume`:
 
-1. Read `.claude/octo/studio/contract.md`, `board.md`, `decisions.md`, and `state.json`.
+1. Read `.claude/octo/run/contract.md`, `board.md`, `decisions.md`, and `state.json`.
 2. If any file is **missing or malformed**: halt immediately. Report exactly which file failed
    and why — this is the one allowed post-contract contact with the client. Do no work until the
    client resolves the state corruption.
@@ -159,8 +168,11 @@ When invoked with `--resume`:
    milestone's scope to the last git commit, then restart from Step 3b. Never resume from
    half-written files.
 5. If no `IN_PROGRESS` milestone exists, continue from the first `PENDING` milestone.
+6. If no milestone is `IN_PROGRESS` or `PENDING` and no delivery report exists, proceed directly
+   to Phase 5 (delivery).
 
-Append to events.jsonl: `{"ts":"<ISO>","type":"resume","last_phase":"<phase from state.json>"}`.
+Append to `.claude/octo/run/events.jsonl`:
+`{"ts":"<ISO>","type":"resume","last_phase":"<phase from state.json>"}`.
 
 Update status: `{"phase":"resume","step":4,"activity":"state restored, continuing"}`.
 
@@ -168,16 +180,26 @@ Update status: `{"phase":"resume","step":4,"activity":"state restored, continuin
 
 When all milestones are `VERIFIED` or `PARKED`:
 
+If ALL milestones are `PARKED`, skip the verifier and go straight to the INCOMPLETE report.
+
 1. Dispatch the **verifier** against the contract's Acceptance Criteria in full (not per-milestone).
 2. On acceptance pass, produce the delivery report covering:
    - **What was built** — one paragraph per VERIFIED milestone, linking to the git commit.
    - **How to run it** — exact commands from the project's CLAUDE.md or detected conventions.
    - **Decision minutes summary** — each D\<n\> entry condensed to one line.
    - **Parked items** — title, reason, and recommended next step for each.
-   - **Known limitations** — anything discovered during the run that falls outside contract scope.
-3. `bash scripts/notify.sh "octo studio" "delivery ready: <mission>"`.
-4. Append: `{"ts":"<ISO>","type":"delivery","mission":"<mission>","milestones_verified":<N>,"milestones_parked":<N>}`.
-5. Update status: `{"phase":"delivery","step":5,"activity":"done"}`.
+   - **Known limitations** — anything discovered during the run that falls outside contract scope,
+     plus any LOW/MEDIUM review residuals carried from milestone inner loops.
+   Then: `bash scripts/notify.sh "octo studio" "delivery ready: <mission>"`;
+   append `{"ts":"<ISO>","type":"delivery","mission":"<mission>","milestones_verified":<N>,"milestones_parked":<N>}`
+   to `.claude/octo/run/events.jsonl`.
+
+   On acceptance fail: produce the same delivery report but headline it **INCOMPLETE** — what was
+   built, which acceptance criteria are unmet and why, parked milestones, recommended next runs.
+   `bash scripts/notify.sh "octo studio" "delivery incomplete: <mission>"`. Never present an
+   incomplete run as delivered.
+
+3. Update status: `{"phase":"delivery","step":5,"activity":"done"}`.
 
 The client reviews the delivery report and either accepts or files change requests.
 Change requests become a **new, smaller studio run** — the current run is closed as-is.
@@ -192,5 +214,5 @@ Change requests become a **new, smaller studio run** — the current run is clos
 - Never use `--no-verify` or force-push.
 - Fan-out cap: **10 parallel lanes**; retry a lane once on error, then report the gap.
 - On any blocked event: `bash scripts/notify.sh "octo studio" "blocked: <reason>"`,
-  overwrite state.json with the current phase, append
-  `{"ts":"<ISO>","type":"blocked","reason":"<reason>"}` to events.jsonl, and report.
+  overwrite `.claude/octo/run/state.json` with the current phase, append
+  `{"ts":"<ISO>","type":"blocked","reason":"<reason>"}` to `.claude/octo/run/events.jsonl`, and report.

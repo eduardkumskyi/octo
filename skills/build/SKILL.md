@@ -29,9 +29,9 @@ Read the host project's `CLAUDE.md`. If absent or missing a needed section:
   CI config). Label every inferred convention `[DETECTED]`.
 
 Initialize run state:
-- Overwrite `.claude/octo/state.json`:
+- Overwrite `.claude/octo/run/state.json`:
   `{"mode": "build", "mission": "<task>", "phase": "read-context", "step": 1, "updated": "<ISO>"}`.
-- Append to `.claude/octo/events.jsonl`:
+- Append to `.claude/octo/run/events.jsonl`:
   `{"ts": "<ISO>", "type": "start", "mode": "build", "mission": "<task>"}`.
 
 Create the native task list for this session (all six steps). This is the single source of
@@ -55,7 +55,8 @@ After the gate clears: the run is unattended. Any new ambiguity discovered later
 by choosing the **most reversible option** and recording it in the plan's `## Assumptions` —
 never silently, and never by asking the user again.
 
-Append to events.jsonl: `{"ts": "<ISO>", "type": "step", "phase": "plan-gate", "activity": "gate cleared"}`.
+Append to `.claude/octo/run/events.jsonl`:
+`{"ts": "<ISO>", "type": "step", "phase": "plan-gate", "activity": "gate cleared"}`.
 Update status: `{"phase": "plan-gate", "step": 2, "activity": "plan saved, gate cleared"}`.
 
 ### Step 3 — Implement with tests
@@ -79,7 +80,8 @@ from `.claude/octo/lessons/*.md`.
 scope. After one retry, record the failure in the batch summary and continue remaining lanes —
 no silent truncation.
 
-After each completed batch, overwrite state.json to update `"lanes"` and append to events.jsonl:
+After each completed batch, overwrite `.claude/octo/run/state.json` to update `"lanes"` and
+append to `.claude/octo/run/events.jsonl`:
 `{"ts": "<ISO>", "type": "batch", "tasks": ["<task-id>", ...], "status": "done|partial"}`.
 
 Update status: `{"phase": "implement", "step": 3, "activity": "all batches complete"}`.
@@ -96,9 +98,11 @@ If tests fail, dispatch the **implementer agent** to fix failures and re-run. Re
 most **5 cycles total**. If tests are still red after cycle 5: stop immediately, report every
 failure with name, assertion, and diagnosis — **never claim done over red**. Run
 `bash scripts/notify.sh "octo build" "blocked: tests red after 5 cycles"`, write final
-state.json, append `{"ts": "<ISO>", "type": "blocked", "reason": "tests red after 5 cycles"}` to events.jsonl, and exit.
+`.claude/octo/run/state.json`, append
+`{"ts": "<ISO>", "type": "blocked", "reason": "tests red after 5 cycles"}`
+to `.claude/octo/run/events.jsonl`, and exit.
 
-On success, append to events.jsonl:
+On success, append to `.claude/octo/run/events.jsonl`:
 `{"ts": "<ISO>", "type": "step", "phase": "test-fix-loop", "activity": "green"}`.
 Update status: `{"phase": "test-fix-loop", "step": 4, "activity": "tests green"}`.
 
@@ -108,9 +112,15 @@ Unattended rule: any new ambiguity → choose the most reversible option and app
 
 Run the /octo:review loop; invoke it with the explicit paths of all files the plan's tasks touched (from the plan's per-task file lists); if Step 3 committed work along the way, use `--branch` instead so committed changes are included. The review skill's own 3-iteration cap applies; do not re-implement it here.
 
-If review exits at cap with residual confirmed findings: HIGH/CRITICAL residuals → treat as blocked (run `bash scripts/notify.sh "octo build" "blocked: unresolved HIGH/CRITICAL findings"`, write state.json, append a `{"type": "blocked", "reason": "unresolved HIGH/CRITICAL findings"}` event, stop and report — never proceed over unresolved HIGH/CRITICAL). LOW/MEDIUM residuals → proceed to Step 6 and list them prominently in the final report.
+If review exits at cap with residual confirmed findings: HIGH/CRITICAL residuals → treat as
+blocked (run `bash scripts/notify.sh "octo build" "blocked: unresolved HIGH/CRITICAL findings"`,
+write `.claude/octo/run/state.json`, append
+`{"type": "blocked", "reason": "unresolved HIGH/CRITICAL findings"}`
+event to `.claude/octo/run/events.jsonl`, stop and report — never proceed over unresolved
+HIGH/CRITICAL). LOW/MEDIUM residuals → proceed to Step 6 and list them prominently in the
+final report.
 
-Append to events.jsonl:
+Append to `.claude/octo/run/events.jsonl`:
 `{"ts": "<ISO>", "type": "step", "phase": "review", "activity": "review complete"}`.
 Update status: `{"phase": "review", "step": 5, "activity": "review clean"}`.
 
@@ -122,13 +132,16 @@ Run the full test suite plus lint. Exception: if `CLAUDE.md` declares `weight: h
 targeted tests only and state that explicitly — the gate is never silently skipped.
 
 On gate failure: run `bash scripts/notify.sh "octo build" "blocked: final gate failed"`,
-write final state.json, append `{"ts": "<ISO>", "type": "blocked", "reason": "final gate failed"}` to events.jsonl, report all failures, and exit.
+write final `.claude/octo/run/state.json`, append
+`{"ts": "<ISO>", "type": "blocked", "reason": "final gate failed"}`
+to `.claude/octo/run/events.jsonl`, report all failures, and exit.
 
 On gate success:
 1. Run `bash scripts/notify.sh "octo build" "done: <mission>"`.
 2. **Offer** to run `/octo:pr` — do **not** auto-create the PR.
 
-Append to events.jsonl: `{"ts": "<ISO>", "type": "complete", "mission": "<task>"}`.
+Append to `.claude/octo/run/events.jsonl`:
+`{"ts": "<ISO>", "type": "complete", "mission": "<task>"}`.
 Update status: `{"phase": "final-gate", "step": 6, "activity": "done"}`.
 
 ---
@@ -141,4 +154,6 @@ Update status: `{"phase": "final-gate", "step": 6, "activity": "done"}`.
 - Never use `--no-verify` or force-push.
 - Fan-out cap: **10 parallel lanes**; retry once, then report the gap.
 - On failure at any step: `bash scripts/notify.sh "octo build" "blocked: <reason>"`,
-  overwrite state.json with the final phase, append `{"ts": "<ISO>", "type": "blocked", "reason": "<reason>"}` to events.jsonl, and report.
+  overwrite `.claude/octo/run/state.json` with the final phase, append
+  `{"ts": "<ISO>", "type": "blocked", "reason": "<reason>"}` to `.claude/octo/run/events.jsonl`,
+  and report.
