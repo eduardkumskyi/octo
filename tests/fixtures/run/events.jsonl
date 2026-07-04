@@ -1,2 +1,5 @@
 {"ts":"2026-07-04T09:00:00Z","type":"milestone","id":"m1","status":"VERIFIED"}
 {"ts":"2026-07-04T10:00:00Z","type":"step","phase":"milestone 2/3","activity":"implementing"}
+{"ts":"2026-07-04T10:06:00Z","type":"decision","id":"D1","question":"sqlite or json store?","ruling":"ACCEPT: json store"}
+{"ts":"2026-07-04T10:07:00Z","type":"finding","iteration":1,"severity":"HIGH","summary":"unguarded index"}
+{"ts":"2026-07-04T10:08:00Z","type":"assumption","label":"SAFE","summary":"default port acceptable"}
