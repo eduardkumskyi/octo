@@ -1,0 +1,112 @@
+---
+name: review
+description: Multi-lens parallel review loop - four reviewer lenses fan out over the diff, findings are adversarially verified, confirmed ones fixed, and the loop repeats until a pass comes back clean (max 3 iterations). Confirmed findings become lesson cards.
+argument-hint: "[--staged | --branch | --report-only | <paths>]"
+---
+
+## Progress Contract
+
+Register these steps as a native task list at Step 1, before beginning. After each step, update
+`.claude/octo/status.json` with `{"phase": <step-name>, "step": <N>, "activity": <short-string>}`.
+Report progress as "N steps remaining, size class S/M/L" — never wall-clock ETAs.
+Report loop progress as `iteration k/3` and `n/4 lenses done`.
+
+Steps: (1) resolve-diff, (2) review-fan-out, (3) adversarial-verify, (4) apply-fixes,
+(5) write-lessons, (6) conclude.
+
+## Arguments
+
+- **`--staged`** — diff staged changes only (`git diff --cached`).
+- **`--branch`** — commits on the current branch not yet on the resolved base. Base: `git symbolic-ref refs/remotes/origin/HEAD` (strip to branch name); if unset, `main` if it exists, else `master`. State the chosen base.
+- **`--report-only`** — list confirmed findings; skip the implementer fix step.
+- **`<paths>`** — restrict the diff to the listed paths. Mutually exclusive with `--staged` and `--branch`; if combined, error and ask the user to choose.
+- **default (no flags)** — working tree and staged changes combined (`git diff HEAD`).
+
+## Workflow
+
+### Step 1 — Resolve diff
+
+Compute the diff using the scoping rules from Arguments. Print which scope was chosen and how
+many files are in the diff.
+
+If the diff is **empty**: report "no changes detected" and exit. Do not start the review loop.
+
+Update status: `{"phase": "resolve-diff", "step": 1, "activity": "diff computed"}`.
+
+### Step 2 — Review fan-out  ← one pass per iteration
+
+Dispatch **four reviewer subagents in a single message** (one per lens: `bugs`, `security`,
+`performance`, `simplicity`). Pass each subagent the diff and the list of changed paths — the
+reviewer uses paths for lesson relevance ranking. Do not duplicate lens checklists, rubric, or
+output format here; the reviewer agent owns those (see `agents/reviewer.md`).
+
+Report `iteration k/3` at the start of each pass. Report `n/4 lenses done` as each subagent
+returns.
+
+Update status: `{"phase": "review-fan-out", "step": 2, "activity": "iteration k/3 dispatched"}`.
+
+### Step 3 — Adversarial verification
+
+For each finding from Step 2, dispatch a **fresh skeptic subagent** with one instruction: refute
+this finding. Model scales with stakes — `haiku` for LOW or MEDIUM severity; `inherit` for HIGH
+or CRITICAL (a cheap skeptic must never be the reason a real security bug gets dismissed). Drop
+findings the skeptic successfully refutes. Carry forward only confirmed findings.
+
+Update status: `{"phase": "adversarial-verify", "step": 3, "activity": "k findings confirmed"}`.
+
+### Step 4 — Apply fixes  ← STOP if --report-only
+
+If `--report-only`: print confirmed findings with severity and location; skip this step.
+
+Otherwise, dispatch the **implementer agent** with the full list of confirmed findings. The
+implementer applies fixes to the working tree. After fixes, recompute the diff on the updated
+state.
+
+Update status: `{"phase": "apply-fixes", "step": 4, "activity": "fixes applied or skipped"}`.
+
+### Step 5 — Write lesson cards
+
+For every confirmed finding, create `.claude/octo/lessons/<kebab-slug>.md`:
+
+```
+---
+pattern: <one-line anti-pattern description>
+severity: low|medium|high
+source: review
+date: YYYY-MM-DD
+---
+```
+
+Body ≤ 25 lines, two required sections:
+
+- `## Example` — `file:line` citation from the finding
+- `## How to catch` — concrete detection guidance
+
+**Cap — 50 cards per project.** Before writing, count existing cards. If already at 50, run an
+inline mini-retro: identify near-duplicates and outgrown lessons, merge or prune them, then add
+the new card. Never exceed 50 without pruning first.
+
+Update status: `{"phase": "write-lessons", "step": 5, "activity": "lesson cards written"}`.
+
+### Step 6 — Iterate or conclude
+
+If the current pass has **zero confirmed findings**: report the diff is clean and exit.
+
+If this was **iteration 3**: exit. Report any residual confirmed findings honestly — file,
+severity, and a one-line summary for each — so the next pass or human reviewer knows what
+remains.
+
+Otherwise increment the iteration counter and return to Step 2 with the updated diff.
+
+Update status: `{"phase": "conclude", "step": 6, "activity": "loop complete"}`.
+
+---
+
+## Shared Conventions
+
+- Commits: conventional format `type(scope): brief description` — no AI attribution,
+  no `Co-Authored-By` lines of any kind.
+- Never push directly to protected branches (`main`, `master`, `qa`, `staging`).
+- Never use `--no-verify` or force-push.
+- Fan-out: all four reviewer dispatches go in a **single message** — serial dispatch is not
+  acceptable when parallel execution halves elapsed time.
