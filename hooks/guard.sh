@@ -31,14 +31,15 @@ if [ -f .claude/octo.json ]; then
 fi
 BR_RE=$(echo "$BRANCHES" | tr ' ' '\n' | sort -u | paste -sd'|' -)
 
-echo "$CMD" | grep -qE "git\s+push\s+.*(-f|--force)(\s|$)" && block "force push"
-echo "$CMD" | grep -qE "git\s+push\s+.*\b(origin|upstream)\s+($BR_RE)\b" && block "push to protected branch"
-echo "$CMD" | grep -qE "git\s+[^|;&]*--no-verify" && block "--no-verify"
-echo "$CMD" | grep -qE "git\s+reset\s+--hard" && block "git reset --hard (use git stash)"
-echo "$CMD" | grep -qE "rm\s+(-[a-zA-Z]*r[a-zA-Z]*f|-[a-zA-Z]*f[a-zA-Z]*r)\s+(/|\./?(\s|$)|\*|src/)" && block "rm -rf on root/cwd/src"
-echo "$CMD" | grep -qiE "\b(DROP\s+TABLE|DROP\s+DATABASE|TRUNCATE|DELETE\s+FROM)\b" \
-  && echo "$CMD" | grep -qiE "\b(psql|mysql|sqlite3|docker\s+exec)\b" \
+printf '%s\n' "$CMD" | grep -qE "git\s+push\s+.*(-f|--force)(\s|$)" && block "force push"
+printf '%s\n' "$CMD" | grep -qE "git\s+push\s+.*\b(origin|upstream)\s+($BR_RE)\b" && block "push to protected branch"
+printf '%s\n' "$CMD" | grep -qE "git\s+push\s+.*:($BR_RE)(\s|$)" && block "push to protected branch via refspec"
+printf '%s\n' "$CMD" | grep -qE "git\s+[^|;&]*--no-verify" && block "--no-verify"
+printf '%s\n' "$CMD" | grep -qE "git\s+reset\s+--hard" && block "git reset --hard (use git stash)"
+printf '%s\n' "$CMD" | grep -qE "rm\s+(-[a-zA-Z]*r[a-zA-Z]*f|-[a-zA-Z]*f[a-zA-Z]*r)\s+(/|\./?(\s|$)|\*|src/)" && block "rm -rf on root/cwd/src"
+printf '%s\n' "$CMD" | grep -qiE "\b(DROP\s+TABLE|DROP\s+DATABASE|TRUNCATE|DELETE\s+FROM)\b" \
+  && printf '%s\n' "$CMD" | grep -qiE "\b(psql|mysql|sqlite3|docker\s+exec)\b" \
   && block "destructive SQL via DB CLI"
-echo "$CMD" | grep -qE "manage\.py\s+dbshell" && block "direct DB shell (use ORM/management commands)"
+printf '%s\n' "$CMD" | grep -qE "manage\.py\s+dbshell" && block "direct DB shell (use ORM/management commands)"
 
 exit 0

@@ -24,8 +24,13 @@ expect_block 'rm -rf src/'
 expect_block 'psql -c "DROP TABLE users"'
 expect_block 'docker exec db psql -c "TRUNCATE posts"'
 expect_block 'python manage.py dbshell'
+# refspec pushes to protected branches must be blocked
+expect_block 'git push origin HEAD:main'
+expect_block 'git push origin feat/x:qa'
+expect_block 'git push --force-with-lease origin HEAD:master'
 
 expect_allow 'git push origin feat/x'
+expect_allow 'git push origin HEAD:feat/y'
 expect_allow 'git status'
 expect_allow 'rm -rf node_modules/foo'
 expect_allow 'psql -c "SELECT 1"'
