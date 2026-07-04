@@ -79,6 +79,15 @@ Both `/octo:build` and `/octo:studio` offer to launch `/octo:watch` at the start
 accept the offer to observe without polling. Use `--terminal` for a one-line wave animation
 (`terminal/octo-anim.py`) when a browser is not available.
 
+### Running multiple sessions
+
+Run state is per-project (`.claude/octo/run/` inside each project root), so parallel sessions
+in **different projects** never collide — each project has its own dashboard, and `serve.py`
+auto-increments the port (8437→8446) if the default is already in use. Only **one** active
+build or studio run per project is supported: a second run in the same project overwrites the
+first's state. The `/octo:build` Step-1 guard detects a recent `state.json` (under 15 minutes
+old) and surfaces it as a RISKY item before overwriting.
+
 ## Safety guard: what it does NOT do
 
 `hooks/guard.sh` is regex-based defense-in-depth, **not a sandbox**. It blocks

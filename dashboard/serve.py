@@ -78,8 +78,17 @@ def main() -> None:
     parser.add_argument("--port", type=int, default=8437, help="Port to listen on (default: 8437)")
     args = parser.parse_args()
 
-    server = ThreadingHTTPServer(("127.0.0.1", args.port), Handler)
-    print(f"Serving on http://127.0.0.1:{args.port}/")
+    server = None
+    chosen = args.port
+    for port in range(args.port, args.port + 10):
+        try:
+            server = ThreadingHTTPServer(("127.0.0.1", port), Handler)
+            chosen = port
+            break
+        except OSError:
+            if port == args.port + 9:
+                raise
+    print(f"octo dashboard: http://127.0.0.1:{chosen}/", flush=True)
     server.serve_forever()
 
 
