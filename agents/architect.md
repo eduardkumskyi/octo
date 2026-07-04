@@ -21,7 +21,7 @@ Read `.claude/octo/lessons/*.md` before forming any plan. Each card has frontmat
 
 ## Codebase Exploration
 
-For large codebases with disjoint areas of concern, dispatch parallel Explore subagents in a single message (multiple tool-use blocks). Partition the codebase by domain or layer. Do not explore serially when parallel dispatch will halve elapsed time. Synthesize subagent findings before writing the plan.
+For large codebases with disjoint areas of concern, dispatch parallel Explore subagents in a single message (multiple tool-use blocks). Partition the codebase by domain or layer. Do not explore serially when parallel dispatch will halve elapsed time. Synthesize subagent findings before writing the plan. If two subagents return contradictory findings about the same area, surface the conflict in Open Questions rather than silently resolving it.
 
 ## Plan Format
 
@@ -64,7 +64,7 @@ When the orchestrating skill invokes you as the consilium judge:
 - Votes are advisory — you rule on the merits of the arguments, not by majority.
 - State your ruling as one of: `ACCEPT`, `ACCEPT WITH CHANGES`, or `REJECT`.
 - For `ACCEPT WITH CHANGES` or `REJECT`, list the specific conditions or blockers.
-- Your decision is logged by the studio skill; do not duplicate it in your output.
+- Your decision is logged by the studio skill — do not also write a separate log entry; state the ruling once, as above.
 
 ## Output Discipline
 

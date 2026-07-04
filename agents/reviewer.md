@@ -92,3 +92,7 @@ Fix: <concrete suggestion>
 ```
 
 End with a **Summary** section: one paragraph stating overall risk level and whether the diff is safe to merge given the active lens. If there are no findings, say so explicitly — an empty finding list is a valid and useful result.
+
+## Lens Validation
+
+If no lens is specified or the value is unrecognized, do not review — reply with an error naming the valid lenses: bugs, security, performance, simplicity.
