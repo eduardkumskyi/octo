@@ -54,9 +54,9 @@ and subagent formats are per-tool; skills and scripts are the portable core.
 | `/octo:retro` | Session post-mortem: mine for corrections, distill into lesson cards |
 | `/octo:handoff` | Write `.claude/handoff.md` so any future session can resume from the current state |
 | `/octo:skill` | Author a new skill, agent, or hook into the octo repo or a host project's `.claude/` |
-| `/octo:audit` | PR-style pre-merge audit: exhaustive, skeptical, read-only review of the current branch against an auto-detected base, across companion repos automatically |
+| `/octo:audit` | PR-style pre-merge audit: exhaustive, skeptical, read-only review of the current branch against a base picked from a question card, across companion repos confirmed in one click |
 
-**`/octo:audit`** audits the current branch against an auto-detected base (explicit arg → `audit base:` in CLAUDE.md → `origin/staging` → repo default) without requiring any edits to the prompt. Companion repos that share the same branch name are detected automatically from sibling directories and pulled into the audit matrix alongside the host repo.
+**`/octo:audit`** audits the current branch against a base you pick from a question card (explicit arg → `audit base:` in CLAUDE.md → choose from a list of origin branches). Companion repos with active work (ahead of base, not on default branch) are detected automatically from sibling directories and confirmed in a single multiSelect before the audit runs.
 
 ## Watching progress
 

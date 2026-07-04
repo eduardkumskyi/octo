@@ -1,6 +1,6 @@
 ---
 name: audit
-description: "PR-style pre-merge audit: exhaustive, skeptical, read-only review of the current branch against an auto-detected base, across companion repos automatically. Reviews like a senior engineer trying to block a risky merge — severity-graded findings with concrete failure modes, cross-repo compatibility, must-fix vs safe-to-defer."
+description: "PR-style pre-merge audit: exhaustive, skeptical, read-only review of the current branch against a base chosen from a question card, across companion repos confirmed by active-work detection. Reviews like a senior engineer trying to block a risky merge — severity-graded findings with concrete failure modes, cross-repo compatibility, must-fix vs safe-to-defer."
 argument-hint: "[base-branch] [--repos <path>...]"
 ---
 
@@ -20,7 +20,7 @@ Steps: (1) resolve-matrix, (2) per-repo-review, (3) cross-repo-lens, (4) skeptic
 ## Arguments
 
 - **`[base-branch]`** — explicit base branch to diff against. If omitted, resolved
-  automatically (see Step 1). Any positional argument that does not start with `--` is
+  via a question card (see Step 1). Any positional argument that does not start with `--` is
   treated as the base branch.
 - **`--repos <path>...`** — one or more paths to companion repos to include in the audit.
   Overrides CLAUDE.md companion-repo discovery and auto-detection entirely.
@@ -34,30 +34,50 @@ Steps: (1) resolve-matrix, (2) per-repo-review, (3) cross-repo-lens, (4) skeptic
 1. Explicit argument — a positional arg provided by the user.
 2. `review base:` or `audit base:` directive in the host project's `CLAUDE.md` — scan for
    either key.
-3. `origin/staging` exists — check with
-   `git ls-remote --heads origin staging`; if the ref is listed, use `staging`.
-4. Repo default — `git symbolic-ref refs/remotes/origin/HEAD` (strip to branch name);
-   if unset, try `main`, then `master`.
+3. Question card — list all branches that exist on origin from the candidate set
+   `[staging, qa, develop, main, master]` via `git ls-remote --heads origin`; collect every
+   hit. Then present **one AskUserQuestion**: "Compare against which base?" with those
+   branches as options. Mark the recommended branch "(Recommended)" and place it first:
+   prefer `staging` if present, otherwise the repo default
+   (`git symbolic-ref refs/remotes/origin/HEAD`, strip to branch name; if unset, the first
+   hit from the candidate set). **Never silently pick a base; never ask the user to type a
+   branch name.**
 
 After resolving the base, fetch it: `git fetch origin <base>`.
 
-**Companion repo resolution** (first match wins):
+The chosen base is applied to companions too when it exists on their origin; otherwise each
+companion falls back to its own CLAUDE.md `review base:`/`audit base:` setting or its own
+question-card resolution (announce per repo which base was used and why).
+
+**Companion repo candidates** (first match wins):
 
 1. `--repos` arguments — use exactly the listed paths.
 2. `companion repos:` line in the host `CLAUDE.md` — parse the paths from that line.
-3. Auto-detection — list sibling directories of the current repo (same parent directory)
-   that are git repos (contain `.git`). For each, check whether it has a local or remote
-   branch named **exactly** like the current repo's active branch
-   (`git ls-remote --heads origin <branch>` inside the sibling). Include every sibling
-   that matches. Announce each included companion:
-   `"detected companion <abs-path> on branch <name>"`.
-   Announce each excluded sibling and why (no matching branch, not a git repo, etc.).
+3. Sibling directories — list directories sharing the same parent as the current repo that
+   contain `.git`.
 
-Each companion is audited against its **own** auto-resolved base using the same four-step
-resolution above (run inside the companion's directory).
+**Active-work filter** — from the candidate list, a repo qualifies as an active companion
+when **both** conditions hold (evaluated inside the companion's directory):
+- Its currently checked-out branch is **not** its default branch
+  (`git symbolic-ref refs/remotes/origin/HEAD`; if unset, `main` / `master`).
+- It is ahead of the resolved base: `git rev-list --count <base>..HEAD` > 0.
 
-**Audit matrix**: print a table — Repo | Branch | Base — covering the host repo and every
-companion before proceeding. This is the contract for the rest of the run.
+Announce each sibling that is evaluated, whether it qualifies, and the reason (e.g.,
+"on default branch", "0 commits ahead of staging", "no `.git`").
+
+**Companion confirmation** — if one or more active companions are detected, present **one
+multiSelect AskUserQuestion** before running any analysis:
+
+- Each option = `"<repo-name>: <branch> vs <base> (+N commits)"` where N comes from
+  `git rev-list --count <base>..HEAD`.
+- All detected active candidates are pre-selected as included.
+- State in the question preamble that the current (host) repo is always audited; the
+  question covers only the companions.
+- If no active candidates are found, skip the question and note
+  "no companion repos with active work detected".
+
+**Audit matrix** — after confirmation, print a table: Repo | Branch | Base — covering the
+host repo and every confirmed companion. This is the contract for the rest of the run.
 
 Register the 🐙 task checklist now.
 
