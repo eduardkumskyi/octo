@@ -19,7 +19,29 @@ Other harnesses: `adapters/install.sh` arrives in Plan 4 (symlinks skills into
   verification notice (all tested: `bash tests/run.sh`)
 - `statusline/` — one-line live status for your terminal statusline
 - `terminal/octo-anim.py` — the wave: `🐙 ⠤⢄⣀⡠⠔⠒⠉⠉⠒⠤  build · step 3/7`
-- skills/agents/dashboard — arriving in Plans 2–4
+**Agents:**
+
+- **architect** — planning, system/API design, and codebase exploration
+- **implementer** — writes production code from a plan
+- **test-engineer** — authors and runs automated tests
+- **reviewer** — parameterized review by lens (bugs, security, performance, simplicity)
+- **verifier** — confirms a change works by running the real app
+
+**Skills:**
+
+| Skill | Purpose |
+|---|---|
+| `/octo:plan` | Explore the codebase and produce an implementation plan with SAFE/RISKY assumptions |
+| `/octo:implement` | Supervised plan execution: implement → test → checkpoint, file-disjoint tasks in parallel |
+| `/octo:test` | Run only the tests affected by the current diff; full suite with `--all` |
+| `/octo:review` | Multi-lens parallel review loop; findings verified and fixed until clean (max 3 iterations) |
+| `/octo:pr` | Create a pull request with a generated description; falls back to push + compare URL |
+| `/octo:debug` | Systematic root-cause debugging: reproduce, rank hypotheses, falsify with evidence |
+| `/octo:retro` | Session post-mortem: mine for corrections, distill into lesson cards |
+| `/octo:handoff` | Write `.claude/handoff.md` so any future session can resume from the current state |
+| `/octo:skill` | Author a new skill, agent, or hook into the octo repo or a host project's `.claude/` |
+
+build, studio, Mission Control — Plan 3; adapters — Plan 4
 
 ## Safety guard: what it does NOT do
 
