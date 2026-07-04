@@ -1,6 +1,6 @@
 ---
 name: implement
-description: Supervised execution of a plan task-by-task: implementer writes code, test-engineer adds tests, targeted tests run, user checkpoint between batches. File-disjoint tasks run in parallel.
+description: "Supervised execution of a plan task-by-task: implementer writes code, test-engineer adds tests, targeted tests run, user checkpoint between batches. File-disjoint tasks run in parallel."
 argument-hint: "[plan-file]"
 ---
 

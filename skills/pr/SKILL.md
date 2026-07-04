@@ -1,6 +1,6 @@
 ---
 name: pr
-description: Create a pull request: detect base branch, verify not protected, run lint/pre-commit if configured, push, open PR with a generated description that always carries an Assumptions section. Falls back to push + compare URL without gh.
+description: "Create a pull request: detect base branch, verify not protected, run lint/pre-commit if configured, push, open PR with a generated description that always carries an Assumptions section. Falls back to push + compare URL without gh."
 argument-hint: "[base-branch]"
 ---
 

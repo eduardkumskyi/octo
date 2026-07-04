@@ -1,6 +1,6 @@
 ---
 name: debug
-description: Systematic root-cause debugging: reproduce first (ideally as a failing test), rank hypotheses, investigate independent ones in parallel, falsify with evidence, fix the cause not the symptom, keep the repro as a regression test, record a lesson.
+description: "Systematic root-cause debugging: reproduce first (ideally as a failing test), rank hypotheses, investigate independent ones in parallel, falsify with evidence, fix the cause not the symptom, keep the repro as a regression test, record a lesson."
 argument-hint: "<bug description>"
 ---
 

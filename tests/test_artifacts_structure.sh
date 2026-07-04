@@ -12,7 +12,10 @@ def fm(path):
     for line in m.group(1).splitlines():
         if ":" in line:
             k, v = line.split(":", 1)
-            meta[k.strip()] = v.strip().strip('"')
+            raw_v = v.strip()
+            if not raw_v.startswith('"') and ': ' in raw_v:
+                sys.exit(f"{path}: unquoted ':' in frontmatter value — quote it")
+            meta[k.strip()] = raw_v.strip('"')
     return meta, m.group(2)
 
 skills = glob.glob("skills/*/SKILL.md")

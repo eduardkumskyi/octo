@@ -1,6 +1,6 @@
 ---
 name: handoff
-description: Write .claude/handoff.md so any future session can resume: current goal, done/remaining tasks, key decisions and assumptions, gotchas discovered, next step. The context-restore hook injects its head after compaction.
+description: "Write .claude/handoff.md so any future session can resume: current goal, done/remaining tasks, key decisions and assumptions, gotchas discovered, next step. The context-restore hook injects its head after compaction."
 argument-hint: ""
 ---
 

@@ -1,6 +1,6 @@
 ---
 name: retro
-description: Session post-mortem: mine the conversation for user corrections, confirmed review findings, and debug root causes; distill them into lesson cards; merge duplicates and prune stale ones.
+description: "Session post-mortem: mine the conversation for user corrections, confirmed review findings, and debug root causes; distill them into lesson cards; merge duplicates and prune stale ones."
 argument-hint: ""
 ---
 
