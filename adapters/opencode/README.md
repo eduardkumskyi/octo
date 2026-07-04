@@ -40,7 +40,7 @@ further configuration is needed.
 > to the absolute path of `hooks/guard.sh` in your repository checkout:
 >
 > ```bash
-> export OCTO_GUARD=/absolute/path/to/claude-octo/hooks/guard.sh
+> export OCTO_GUARD=/absolute/path/to/octo/hooks/guard.sh
 > ```
 
 ## Skills and CLAUDE.md

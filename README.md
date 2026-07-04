@@ -7,7 +7,7 @@ Agent Skills format.
 
 ## Install (Claude Code)
 
-    /plugin marketplace add eduardkumskyi/claude-octo
+    /plugin marketplace add eduardkumskyi/octo
     /plugin install octo
 
 ## Other harnesses
