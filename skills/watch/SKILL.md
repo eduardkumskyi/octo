@@ -14,8 +14,8 @@ Two modes:
 | Flag | What runs | Foreground/background |
 |------|-----------|-----------------------|
 | _(none)_ | `dashboard/serve.sh --open` — full Mission Control web UI | background |
-| `--terminal` | `terminal/octo-anim.py` — one-line braille wave animation | foreground |
-| `--port N` | same as default, but overrides the port (default: 8437) | background |
+| `--terminal` | prints the command the user should run in their own terminal | n/a — hands off to user |
+| `--port N` | same as default, but overrides the requested port (default: 8437; auto-increments if busy) | background |
 
 ## Default mode — Mission Control dashboard
 
@@ -37,9 +37,11 @@ With a custom port:
 bash "${CLAUDE_PLUGIN_ROOT}/dashboard/serve.sh" --port 9000 --open &
 ```
 
-Report the URL to the user immediately after starting:
+Report the URL to the user immediately after starting. Read it from the line `serve.py` prints
+to stdout — it has the form `octo dashboard: http://127.0.0.1:<port>/`. Do **not** assume port
+8437: if the port was busy, `serve.py` auto-incremented to the next free port (up to +9).
 
-> Mission Control is live at **http://127.0.0.1:8437/** (or the overridden port).
+> Mission Control is live at **http://127.0.0.1:&lt;port&gt;/** (read from serve.py output).
 > Stop it with `kill %1` or `kill <PID>` when done.
 
 The dashboard auto-refreshes. It shows:
@@ -53,22 +55,23 @@ To stop: `kill <PID>` or `kill %1` if it is still a shell job.
 
 ## `--terminal` mode — wave animation
 
-When `--terminal` is passed, run the animation in the **foreground** instead:
-
-```bash
-python3 "${CLAUDE_PLUGIN_ROOT}/terminal/octo-anim.py"
-```
-
-This displays a scrolling braille wave and the current phase/activity from
-`.claude/octo/status.json`, one line at a time:
+When `--terminal` is passed, **do not run the animation via a Bash tool**. It is an infinite
+loop and cannot run interactively inside a session. Instead, print the exact command for the
+user to run in their own terminal window:
 
 ```
-🐙 ⠤⢄⣀⡠⠔⠒⠉⠉⠒⠤  build · step 3/7
+Run this in a separate terminal:
+
+    python3 /path/to/octo/terminal/octo-anim.py
+
+Resolve the path via ${CLAUDE_PLUGIN_ROOT} when that variable is set; otherwise use the
+known path to the octo repo's terminal/ directory.
 ```
 
-Zero dependencies — only the Python standard library.
+The passive default is the **statusline** (`statusline/octo-statusline.sh`, wired via the
+`statusLine` setting in your harness config) — always visible without any command.
 
-To stop: **Ctrl-C**.
+Never attempt to run `octo-anim.py` via a Bash tool. Never use `timeout` as a workaround.
 
 ## Launching watch from build / studio
 

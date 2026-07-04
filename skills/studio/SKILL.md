@@ -13,6 +13,10 @@ Report progress as "N phases remaining, milestone M of K" — never wall-clock E
 
 Phases: (1) contract, (2) consilium-setup, (3) milestone-loop, (4) resume, (5) delivery.
 
+**State-write gate**: a step has not STARTED until its `state.json` overwrite and
+`events.jsonl` entry are written. Write state FIRST, then do the step's work — never the
+reverse. A growing "updated Xm ago" on the dashboard means you are violating this contract.
+
 Relationship note: build = task / hours / user nearby; studio = mission / days / user absent.
 Accepted interpretation: supervision granularity inside the inner loop is per-batch.
 

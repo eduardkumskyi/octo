@@ -14,6 +14,10 @@ Report progress as "N steps remaining, size class S/M/L" — never wall-clock ET
 Steps: (1) read-context, (2) plan-gate, (3) implement, (4) test-fix-loop,
 (5) review, (6) final-gate.
 
+**State-write gate**: a step has not STARTED until its `state.json` overwrite and
+`events.jsonl` entry are written. Write state FIRST, then do the step's work — never the
+reverse. A growing "updated Xm ago" on the dashboard means you are violating this contract.
+
 ## Arguments
 
 - **`<task description>`** — what to build. Required; if omitted, ask once then proceed.
@@ -27,6 +31,10 @@ Read the host project's `CLAUDE.md`. If absent or missing a needed section:
 - Offer to scaffold a minimal `CLAUDE.md` and wait for the user's answer.
 - Detect conventions from repo artifacts (`pyproject.toml`, `Makefile`, `package.json`,
   CI config). Label every inferred convention `[DETECTED]`.
+
+If `.claude/octo/run/state.json` already exists with `updated` less than 15 minutes old,
+another run may be active in this project — raise this at the Step-2 gate as a RISKY item
+and get explicit confirmation before overwriting.
 
 Initialize run state:
 - Overwrite `.claude/octo/run/state.json`:
@@ -60,6 +68,9 @@ Append to `.claude/octo/run/events.jsonl`:
 Update status: `{"phase": "plan-gate", "step": 2, "activity": "plan saved, gate cleared"}`.
 
 ### Step 3 — Implement with tests
+
+**First action of this step**: overwrite `state.json` with `phase` set to `"implementing"` and
+the dispatched lanes — do this before any implementation work begins.
 
 Unattended rule: any new ambiguity → choose the most reversible option and append it as `[SAFE]`/`[RISKY]` to the plan's `## Assumptions` — never silently, never by asking.
 
