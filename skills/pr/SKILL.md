@@ -76,8 +76,7 @@ PR body template:
 ```
 
 Carry the `## Assumptions` section verbatim from the plan file used in the preceding
-`/octo:implement` run (`.claude/plans/` latest by name, or the plan whose slug matches the
-branch context). The section is **always present**, even when empty — write
+`/octo:implement` run (`.claude/plans/` latest by name). The section is **always present**, even when empty — write
 `"None beyond the plan"` rather than omitting it.
 
 No AI attribution in the PR body, title, or any commit message — ever.

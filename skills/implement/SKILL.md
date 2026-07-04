@@ -1,12 +1,12 @@
 ---
 name: implement
-description: Supervised execution of a plan task-by-task: implementer writes code, test-engineer adds tests, targeted tests run, user checkpoint between tasks. File-disjoint tasks run in parallel.
+description: Supervised execution of a plan task-by-task: implementer writes code, test-engineer adds tests, targeted tests run, user checkpoint between batches. File-disjoint tasks run in parallel.
 argument-hint: "[plan-file]"
 ---
 
 ## Progress Contract
 
-Register these steps as a native task list at Step 2, before beginning. After each step, update
+Register these steps as a native task list at Step 2, immediately after the plan is resolved. After each step, update
 `.claude/octo/status.json` with `{"phase": <step-name>, "step": <N>, "activity": <short-string>}`.
 Report progress as "N steps remaining, size class S/M/L" — never wall-clock ETAs.
 
@@ -79,6 +79,10 @@ Present a brief batch report:
 - Tasks completed in this batch (task title, files changed)
 - Test results (pass/fail counts)
 - Any RISKY assumptions or open items from implementer/test-engineer outputs
+
+For parallel batches, this checkpoint covers all tasks in the batch as a unit — supervision is between batches, not between tasks inside one batch.
+
+Append any new [SAFE]/[RISKY] assumptions from implementer or test-engineer outputs to the plan file's ## Assumptions section — /octo:pr carries that section into the PR body, so nothing surfaced during execution is lost.
 
 **STOP.** Wait for the user to approve before proceeding to the next batch. If the user
 requests changes, dispatch the implementer for corrections, re-run tests, then re-present
