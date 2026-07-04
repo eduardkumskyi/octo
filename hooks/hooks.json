@@ -2,18 +2,18 @@
   "hooks": {
     "PreToolUse": [
       { "matcher": "Bash",
-        "hooks": [{ "type": "command", "command": "${CLAUDE_PLUGIN_ROOT}/hooks/guard.sh" }] }
+        "hooks": [{ "type": "command", "command": "${CLAUDE_PLUGIN_ROOT}/hooks/guard.sh", "statusMessage": "🐙 guard check" }] }
     ],
     "PostToolUse": [
       { "matcher": "Edit|Write",
-        "hooks": [{ "type": "command", "command": "${CLAUDE_PLUGIN_ROOT}/hooks/auto-format.sh" }] }
+        "hooks": [{ "type": "command", "command": "${CLAUDE_PLUGIN_ROOT}/hooks/auto-format.sh", "statusMessage": "🐙 auto-format" }] }
     ],
     "SessionStart": [
       { "matcher": "compact|resume",
-        "hooks": [{ "type": "command", "command": "${CLAUDE_PLUGIN_ROOT}/hooks/context-restore.sh" }] }
+        "hooks": [{ "type": "command", "command": "${CLAUDE_PLUGIN_ROOT}/hooks/context-restore.sh", "statusMessage": "🐙 restoring context" }] }
     ],
     "Stop": [
-      { "hooks": [{ "type": "command", "command": "${CLAUDE_PLUGIN_ROOT}/hooks/verify-done.sh" }] }
+      { "hooks": [{ "type": "command", "command": "${CLAUDE_PLUGIN_ROOT}/hooks/verify-done.sh", "statusMessage": "🐙 verify check" }] }
     ]
   }
 }

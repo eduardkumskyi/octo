@@ -11,6 +11,8 @@ After each phase transition, update `.claude/octo/status.json` with
 `{"phase": <phase-name>, "step": <N>, "activity": <short-string>}`.
 Report progress as "N phases remaining, milestone M of K" — never wall-clock ETAs.
 
+Register steps in the native task list named `🐙 <milestone-id> <n>/<total> — <step>`; update each to in_progress/completed as you go — the checklist is the user's primary progress view.
+
 Phases: (1) contract, (2) consilium-setup, (3) milestone-loop, (4) resume, (5) delivery.
 
 **State-write gate**: a step has not STARTED until its `state.json` overwrite and
@@ -27,8 +29,7 @@ Accepted interpretation: supervision granularity inside the inner loop is per-ba
 
 ## Phase 1 — Contract  ← STOP
 
-This is the only moment the studio contacts the client for decisions. Conduct a deep interview
-covering six topics, in this order:
+This is the only moment the studio contacts the client for decisions. Use AskUserQuestion for every enumerable choice in the interview (control scheme, scope options, limits); free-text prose only for genuinely open fields like the mission statement. Conduct a deep interview covering six topics, in this order:
 
 1. **Mission** — what outcome must exist in the world when the run finishes?
 2. **Acceptance Criteria** — ask "done means…" for each deliverable; push for observable, testable answers.
@@ -190,7 +191,7 @@ When all milestones are `VERIFIED` or `PARKED`:
 If ALL milestones are `PARKED`, skip the verifier and go straight to the INCOMPLETE report (the INCOMPLETE path's notify applies here too).
 
 1. Dispatch the **verifier** against the contract's Acceptance Criteria in full (not per-milestone).
-2. On acceptance pass, produce the delivery report covering:
+2. On acceptance pass, produce the delivery report. Begin with an acceptance-criteria checklist (✅/❌ per criterion from the contract). Then include the following bullet sections:
    - **What was built** — one paragraph per VERIFIED milestone, linking to the git commit.
    - **How to run it** — exact commands from the project's CLAUDE.md or detected conventions.
    - **Decision minutes summary** — each D\<n\> entry condensed to one line.

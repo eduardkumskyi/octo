@@ -11,6 +11,8 @@ After each step, update `.claude/octo/status.json` with
 `{"phase": <step-name>, "step": <N>, "activity": <short-string>}`.
 Report progress as "N steps remaining, size class S/M/L" — never wall-clock ETAs.
 
+Register steps in the native task list named `🐙 <n>/<total> — <step name>`; update each to in_progress/completed as you go — the checklist is the user's primary progress view.
+
 Steps: (1) read-context, (2) plan-gate, (3) implement, (4) test-fix-loop,
 (5) review, (6) final-gate.
 
@@ -152,7 +154,8 @@ to `.claude/octo/run/events.jsonl`, report all failures, and exit.
 
 On gate success:
 1. Run `bash scripts/notify.sh "octo build" "done: <mission>"`.
-2. **Offer** to run `/octo:pr` — do **not** auto-create the PR.
+2. Produce the final report as a markdown table (columns: Step | Result) listing every step outcome, followed by an Assumptions list (all [SAFE]/[RISKY] items recorded during the run) and any residual LOW/MEDIUM findings from the review step.
+3. **Offer** to run `/octo:pr` — do **not** auto-create the PR.
 
 Append to `.claude/octo/run/events.jsonl`:
 `{"ts": "<ISO>", "type": "complete", "mission": "<task>"}`.

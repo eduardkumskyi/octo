@@ -2,6 +2,7 @@
 name: verifier
 description: Confirms a change works by running the real app, endpoint, or UI. Reports observed vs expected with the exact commands used. Never edits files.
 model: haiku
+color: cyan
 disallowedTools: Write, Edit, NotebookEdit
 ---
 

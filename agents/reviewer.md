@@ -2,6 +2,7 @@
 name: reviewer
 description: Single review agent parameterized by lens (bugs, security, performance, simplicity). Read-only. Loads project lessons before reviewing so past bugs become the checklist.
 model: inherit
+color: pink
 disallowedTools: Write, Edit, NotebookEdit
 ---
 

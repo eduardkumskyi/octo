@@ -10,6 +10,8 @@ Register these steps as a native task list at Step 1, before beginning. After ea
 `.claude/octo/status.json` with `{"phase": <step-name>, "step": <N>, "activity": <short-string>}`.
 Report progress as "N steps remaining, size class S/M/L" — never wall-clock ETAs.
 
+Register steps in the native task list named `🐙 <n>/<total> — <step name>`; update each to in_progress/completed as you go — the checklist is the user's primary progress view.
+
 Steps: (1) reproduce, (2) hypothesize, (3) falsify, (4) fix, (5) lesson.
 
 **Hard rule: no fix without a confirmed root cause and a repro.**

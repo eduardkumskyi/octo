@@ -10,6 +10,8 @@ Register these steps as a native task list at Step 2, immediately after the plan
 `.claude/octo/status.json` with `{"phase": <step-name>, "step": <N>, "activity": <short-string>}`.
 Report progress as "N steps remaining, size class S/M/L" — never wall-clock ETAs.
 
+Register steps in the native task list named `🐙 <n>/<total> — <step name>`; update each to in_progress/completed as you go — the checklist is the user's primary progress view.
+
 Steps: (1) resolve-plan, (2) register-progress, (3) partition-tasks, then per batch:
 (4) implement-batch, (5) test-batch, (6) run-tests, (7) checkpoint; finally (8) conclude.
 
@@ -84,9 +86,7 @@ For parallel batches, this checkpoint covers all tasks in the batch as a unit �
 
 Append any new [SAFE]/[RISKY] assumptions from implementer or test-engineer outputs to the plan file's ## Assumptions section — /octo:pr carries that section into the PR body, so nothing surfaced during execution is lost.
 
-**STOP.** Wait for the user to approve before proceeding to the next batch. If the user
-requests changes, dispatch the implementer for corrections, re-run tests, then re-present
-this checkpoint.
+**STOP.** Use AskUserQuestion: "Batch N done — continue?" with options: Continue / Adjust next batch / Stop here. If the user requests changes, dispatch the implementer for corrections, re-run tests, then re-present this checkpoint.
 
 Update status: `{"phase": "checkpoint", "step": 7, "activity": "awaiting user"}`.
 

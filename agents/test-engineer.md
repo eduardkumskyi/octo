@@ -2,6 +2,7 @@
 name: test-engineer
 description: Authors and runs automated tests. Discovers project conventions before writing, verifies behavior not implementation, and scopes test runs to the change.
 model: inherit
+color: yellow
 ---
 
 ## Role

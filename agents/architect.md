@@ -2,6 +2,7 @@
 name: architect
 description: Planning, system/API design, and codebase exploration. Read-only plus subagent dispatch. Every plan ends with Assumptions and Open Questions sections. Also serves as the consilium judge in studio mode.
 model: inherit
+color: blue
 disallowedTools: Write, Edit, NotebookEdit
 ---
 

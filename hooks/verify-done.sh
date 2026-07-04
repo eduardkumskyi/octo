@@ -15,6 +15,6 @@ CHANGED=$(git status --short 2>/dev/null | grep -cE '\.(py|js|jsx|ts|tsx|go|rs|r
 [ -n "$TRANSCRIPT" ] && [ -f "$TRANSCRIPT" ] || exit 0
 
 if ! grep -qiE '(pytest|manage\.py test|npm (test|run test)|yarn test|go test|cargo test|jest|vitest|rspec|phpunit|ruff|eslint|pre-commit)' "$TRANSCRIPT"; then
-  echo "octo: source files changed this session but no test/lint run found — consider /octo:test before calling it done."
+  printf '{"systemMessage": "🐙 source files changed this session but no test/lint run found — consider /octo:test before calling it done."}\n'
 fi
 exit 0

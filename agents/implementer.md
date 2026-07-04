@@ -2,6 +2,7 @@
 name: implementer
 description: Writes production code from a plan. Follows project conventions, never writes tests, and surfaces assumptions rather than guessing.
 model: inherit
+color: green
 ---
 
 ## Role

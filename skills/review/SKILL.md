@@ -11,6 +11,8 @@ Register these steps as a native task list at Step 1, before beginning. After ea
 Report progress as "N steps remaining, size class S/M/L" — never wall-clock ETAs.
 Report loop progress as `iteration k/3` and `n/4 lenses done`.
 
+Register steps in the native task list named `🐙 <n>/<total> — <step name>`; update each to in_progress/completed as you go — the checklist is the user's primary progress view.
+
 Steps: (1) resolve-diff, (2) review-fan-out, (3) adversarial-verify, (4) apply-fixes,
 (5) write-lessons, (6) conclude.
 
@@ -109,7 +111,7 @@ If the current pass has **zero confirmed findings**: report the diff is clean an
 
 If this was **iteration 3**: exit. Report any residual confirmed findings honestly — file,
 severity, and a one-line summary for each — so the next pass or human reviewer knows what
-remains.
+remains. Present the final output as a findings table with columns: Severity | File | Finding | Fixed?
 
 Otherwise increment the iteration counter. Recompute the diff for the next pass: for
 **default/`--staged`**, use the same scope as originally defined; for **`--branch`**, use

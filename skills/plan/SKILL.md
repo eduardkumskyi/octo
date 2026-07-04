@@ -10,6 +10,8 @@ Register these steps as a native task list at Step 2, before beginning explorati
 `.claude/octo/status.json` with `{"phase": <step-name>, "step": <N>, "activity": <short-string>}`.
 Report progress as "N steps remaining, size class S/M/L" — never wall-clock ETAs.
 
+Register steps in the native task list named `🐙 <n>/<total> — <step name>`; update each to in_progress/completed as you go — the checklist is the user's primary progress view.
+
 Steps: (1) read-project-context, (2) register-progress, (3) explore,
 (4) author-plan, (5) assumption-gate, (6) save-and-register.
 
@@ -73,9 +75,7 @@ Update status: `{"phase": "author-plan", "step": 4, "activity": "architect agent
 Scan the `## Assumptions` section for any item marked `RISKY` where the consequence is also
 **hard to reverse** (e.g. schema migrations, public API removals, irreversible data transforms).
 
-**If any such item exists**: STOP. Do not save the plan. Present each blocker to the user as a
-clear question (AskUserQuestion or equivalent). Wait for answers. Update the plan's Assumptions
-and Open Questions accordingly, then continue to Step 6.
+**If any such item exists**: STOP. Do not save the plan. Present RISKY assumptions via AskUserQuestion: one question per assumption, the options being the concrete alternatives (recommended option first, labeled '(Recommended)'); never a prose wall. Wait for answers. Update the plan's Assumptions and Open Questions accordingly, then continue to Step 6.
 
 If no RISKY + hard-to-reverse items exist, proceed immediately.
 

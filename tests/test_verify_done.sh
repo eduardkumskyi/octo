@@ -11,7 +11,7 @@ T_NO=$TMP/no_tests.jsonl;  echo '{"type":"tool_use","command":"git status"}' > "
 T_YES=$TMP/tests.jsonl;    echo '{"type":"tool_use","command":"pytest tests/ -x"}' > "$T_YES"
 
 OUT=$(printf '{"transcript_path":"%s"}' "$T_NO" | bash "$H")
-echo "$OUT" | grep -qi "no test" || { echo "expected notice, got: $OUT"; exit 1; }
+echo "$OUT" | grep -q "systemMessage" && echo "$OUT" | grep -qi "no test" || { echo "expected notice, got: $OUT"; exit 1; }
 
 OUT=$(printf '{"transcript_path":"%s"}' "$T_YES" | bash "$H")
 [ -z "$OUT" ] || { echo "expected silence, got: $OUT"; exit 1; }
