@@ -10,8 +10,8 @@ Agent Skills format.
     /plugin marketplace add eduardkumskyi/claude-octo
     /plugin install octo
 
-Other harnesses: `adapters/install.sh` (symlinks skills into `~/.claude/skills`
-and `~/.agents/skills`; see docs/specs for the compatibility matrix).
+Other harnesses: `adapters/install.sh` arrives in Plan 4 (symlinks skills into
+`~/.claude/skills` and `~/.agents/skills`; see docs/specs for the compatibility matrix).
 
 ## What's inside
 
@@ -28,9 +28,13 @@ the obvious: force-push, pushes to protected branches, `--no-verify`,
 `git reset --hard`, `rm -rf` on root/cwd/src, destructive SQL via DB CLIs,
 direct `dbshell`. It does NOT see through shell variables (`psql -c "$Q"`),
 heredocs, or files piped into a DB client. Treat it as a seatbelt, not a cage.
+Additional known limits: non-origin/upstream remotes are not matched; `rm -rf ~` is
+not blocked; `--no-verify` anywhere in a git command's text blocks (fail-closed);
+requires GNU or BSD grep — busybox/toybox grep lacks `\s`/`\b` and silently disables rules.
 
 Per-project extras: `.claude/octo.json` (`protected_branches`) and
 `.claude/hooks/guard-extra.sh` (sourced with `$CMD` + `block()` available).
+`guard-extra.sh` is executed shell code — only add it in repositories you trust.
 
 ## Per-project config
 
