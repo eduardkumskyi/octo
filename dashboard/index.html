@@ -477,6 +477,7 @@
 
   var _state  = null;
   var _events = [];
+  var _busy   = false;
 
   /* ── Helpers ──────────────────────────────────────────── */
 
@@ -485,7 +486,8 @@
       .replace(/&/g, '&amp;')
       .replace(/</g, '&lt;')
       .replace(/>/g, '&gt;')
-      .replace(/"/g, '&quot;');
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#39;');
   }
 
   function agoStr(iso) {
@@ -743,6 +745,8 @@
   /* ── Poll ─────────────────────────────────────────────── */
 
   function poll() {
+    if (_busy) return;
+    _busy = true;
     fetchState(function (state) {
       _state = state;
       fetchEvents(function (events) {
@@ -753,6 +757,7 @@
         renderDecisions(_events);
         renderBurndown(_events);
         renderEta(_state, _events);
+        _busy = false;
       });
     });
   }
