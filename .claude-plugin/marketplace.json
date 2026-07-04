@@ -1,0 +1,11 @@
+{
+  "name": "octo-marketplace",
+  "owner": { "name": "Eduard Kumskyi" },
+  "plugins": [
+    {
+      "name": "octo",
+      "source": "./",
+      "description": "Portable AI-agent workflow toolkit: plan, build, review-until-clean, lessons engine, studio mode, Mission Control."
+    }
+  ]
+}

@@ -1,0 +1,6 @@
+{
+  "name": "octo",
+  "description": "Portable AI-agent workflow toolkit: plan, build, review-until-clean, lessons engine, studio mode, Mission Control.",
+  "version": "0.1.0",
+  "author": { "name": "Eduard Kumskyi" }
+}
