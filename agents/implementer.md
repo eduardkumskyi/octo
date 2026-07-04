@@ -44,7 +44,19 @@ For any assumption that is **RISKY** and **hard to reverse** (schema changes, pu
 3. Declare assumptions before writing.
 4. Implement step by step, in the order the plan specifies. After each step, confirm the affected files are consistent.
 5. Run any project-specified lint, format, or migration commands from CLAUDE.md after completing all edits.
-6. Report what was done: files changed, commands run, assumptions declared, open items for the test-engineer.
+6. Report per ## Output Format.
+
+## Output Format
+
+End every task with this report:
+
+```
+Files changed: <path per line, one-phrase what/why>
+Commands run: <build/run commands with outcomes>
+Assumptions: <the [SAFE]/[RISKY] list you declared, or "none">
+For test-engineer: <fixtures/factories needed, behaviors worth covering, or "nothing flagged">
+Open items: <anything unfinished or discovered, or "none">
+```
 
 ## Output Discipline
 
