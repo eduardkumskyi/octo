@@ -159,7 +159,7 @@ Update status.json after each milestone: `{"phase":"milestone-loop","step":3,"ac
 
 When invoked with `--resume`:
 
-1. Read `.claude/octo/run/contract.md`, `board.md`, `decisions.md`, and `state.json`.
+1. Read `.claude/octo/run/contract.md`, `.claude/octo/run/board.md`, `.claude/octo/run/decisions.md`, and `.claude/octo/run/state.json`.
 2. If any file is **missing or malformed**: halt immediately. Report exactly which file failed
    and why — this is the one allowed post-contract contact with the client. Do no work until the
    client resolves the state corruption.
@@ -180,7 +180,7 @@ Update status: `{"phase":"resume","step":4,"activity":"state restored, continuin
 
 When all milestones are `VERIFIED` or `PARKED`:
 
-If ALL milestones are `PARKED`, skip the verifier and go straight to the INCOMPLETE report.
+If ALL milestones are `PARKED`, skip the verifier and go straight to the INCOMPLETE report (the INCOMPLETE path's notify applies here too).
 
 1. Dispatch the **verifier** against the contract's Acceptance Criteria in full (not per-milestone).
 2. On acceptance pass, produce the delivery report covering:
@@ -188,6 +188,7 @@ If ALL milestones are `PARKED`, skip the verifier and go straight to the INCOMPL
    - **How to run it** — exact commands from the project's CLAUDE.md or detected conventions.
    - **Decision minutes summary** — each D\<n\> entry condensed to one line.
    - **Parked items** — title, reason, and recommended next step for each.
+   - **Recorded assumptions** — every `type: assumption` event from events.jsonl, with labels.
    - **Known limitations** — anything discovered during the run that falls outside contract scope,
      plus any LOW/MEDIUM review residuals carried from milestone inner loops.
    Then: `bash scripts/notify.sh "octo studio" "delivery ready: <mission>"`;
