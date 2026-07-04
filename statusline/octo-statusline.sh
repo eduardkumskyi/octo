@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # octo statusline — one line: 🐙 branch · phase · step · activity
 set -uo pipefail
-cat >/dev/null 2>&1 || true   # harness may pipe session JSON; unused
+[ -t 0 ] || cat >/dev/null 2>&1 || true   # harness may pipe session JSON; drain only if stdin is not a tty
 
 BR=$(git branch --show-current 2>/dev/null || true)
 LINE="🐙"

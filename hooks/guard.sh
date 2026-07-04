@@ -26,14 +26,19 @@ BRANCHES="main master staging production qa develop"
 DEF=$(git symbolic-ref --short refs/remotes/origin/HEAD 2>/dev/null | sed 's|.*/||' || true)
 [ -n "$DEF" ] && BRANCHES="$BRANCHES $DEF"
 if [ -f .claude/octo.json ]; then
-  EXTRA=$(python3 -c 'import json;print(" ".join(json.load(open(".claude/octo.json")).get("protected_branches",[])))' 2>/dev/null || true)
+  EXTRA=$(python3 -c 'import json,re
+branches=json.load(open(".claude/octo.json")).get("protected_branches",[])
+safe=[b for b in branches if re.fullmatch(r"[A-Za-z0-9._/-]+",b)]
+print(" ".join(safe))' 2>/dev/null || true)
   [ -n "$EXTRA" ] && BRANCHES="$BRANCHES $EXTRA"
 fi
 BR_RE=$(echo "$BRANCHES" | tr ' ' '\n' | sort -u | paste -sd'|' -)
 
-printf '%s\n' "$CMD" | grep -qE "git\s+push\s+.*(-f|--force)(\s|$)" && block "force push"
-printf '%s\n' "$CMD" | grep -qE "git\s+push\s+.*\b(origin|upstream)\s+($BR_RE)\b" && block "push to protected branch"
-printf '%s\n' "$CMD" | grep -qE "git\s+push\s+.*:($BR_RE)(\s|$)" && block "push to protected branch via refspec"
+printf '%s\n' "$CMD" | grep -qE "git\s+push(\s|$)" && \
+  printf '%s\n' "$CMD" | grep -qE "(^|\s)(-f|--force)(\s|$)" && block "force push"
+printf '%s\n' "$CMD" | grep -qE "git\s+push.*--mirror" && block "push --mirror force-updates all refs"
+printf '%s\n' "$CMD" | grep -qE "git\s+push\s+.*\b(origin|upstream)\s+\+?($BR_RE)\b" && block "push to protected branch"
+printf '%s\n' "$CMD" | grep -qE "git\s+push\s+.*:\+?($BR_RE)(\s|$)" && block "push to protected branch via refspec"
 printf '%s\n' "$CMD" | grep -qE "git\s+[^|;&]*--no-verify" && block "--no-verify"
 printf '%s\n' "$CMD" | grep -qE "git\s+reset\s+--hard" && block "git reset --hard (use git stash)"
 printf '%s\n' "$CMD" | grep -qE "rm\s+(-[a-zA-Z]*r[a-zA-Z]*f|-[a-zA-Z]*f[a-zA-Z]*r)\s+(/|\./?(\s|$)|\*|src/)" && block "rm -rf on root/cwd/src"
