@@ -8,9 +8,14 @@ argument-hint: "[scope | --all]"
 
 Register these steps as a native task list at Step 1, before running. After each step, update
 `.claude/octo/status.json` with `{"phase": <step-name>, "step": <N>, "activity": <short-string>}`.
-Report progress as "N steps remaining" — never wall-clock ETAs.
+Report progress as "N steps remaining, size class S/M/L" — never wall-clock ETAs.
 
 Steps: (1) read-config, (2) compute-diff, (3) select-tests, (4) run-tests.
+
+## Arguments
+
+- **`scope`** — optional path. Test files/dirs → run exactly those (skip diff mapping). Source paths → restrict diff selection to changes under that subtree. Mutually exclusive with `--all`; if both are given, error and ask the user to choose.
+- **`--all`** — full suite. Mutually exclusive with `scope`.
 
 ## Workflow
 
@@ -33,6 +38,8 @@ If `CLAUDE.md` is absent or missing a `test_command`:
 Update status: `{"phase": "read-config", "step": 1, "activity": "read CLAUDE.md"}`.
 
 ### Step 2 — Compute diff
+
+Resolve the base branch: `git symbolic-ref refs/remotes/origin/HEAD` (strip to branch name); if unset, use `main` if it exists, else `master`. State the chosen base in the selection printout.
 
 Combine `git diff HEAD` (working tree + index) with commits on the current branch not yet on
 the base branch.
