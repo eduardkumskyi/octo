@@ -53,7 +53,9 @@ Print the surviving root cause with the evidence chain that confirms it.
 
 Update status: `{"phase": "falsify", "step": 3, "activity": "root cause confirmed"}`.
 
-### Step 4 — Fix
+### Step 4 — Fix  ← STOP if no confirmed root cause and repro
+
+Gate: if Step 3 did not end with exactly one surviving, evidence-backed hypothesis AND a repro from Step 1, stop and go back — do not dispatch a fix.
 
 Dispatch the **implementer agent** with the confirmed root cause, the repro case, and the
 source paths involved. The implementer fixes the root cause — not a downstream symptom.
@@ -75,7 +77,7 @@ exists, update its `date` and `## Example` section instead of duplicating.
 ```
 ---
 pattern: <one-line anti-pattern description>
-severity: low|medium|high
+severity: low|medium|high  # CRITICAL→high
 source: debug
 date: YYYY-MM-DD
 ---

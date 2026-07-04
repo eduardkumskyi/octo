@@ -58,6 +58,7 @@ Write `.claude/handoff.md` with exactly these five sections, in this order:
 **Head constraint**: the first 30 lines of the file must be self-sufficient — they are what
 the context-restore hook re-injects after compaction. Put the highest-value context (goal,
 next step, and the most critical gotchas) within those 30 lines. Longer details can follow.
+Budget the head: ## Current goal ≤ 3 lines, ## Next step ≤ 2 lines, most critical gotchas ≤ 5 lines — these three MUST sit inside the first 30 lines; everything else goes below the fold.
 
 **Living pointer**: overwrite the previous `.claude/handoff.md` entirely. Git history is not
 the archive — the file is a single pointer to the current resumption state, not a log.

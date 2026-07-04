@@ -95,7 +95,7 @@ Body ≤ 25 lines, two required sections:
 - `## Example` — `file:line` citation from the finding
 - `## How to catch` — concrete detection guidance
 
-**Cap — 50 cards per project.** Before writing, count existing cards. If already at 50, run an
+**Cap — 50 cards per project; 20 in the global store (`~/.claude/octo/lessons/`).** Before writing, count existing cards. If already at 50, run an
 inline mini-retro: identify near-duplicates and outgrown lessons, merge or prune them, then add
 the new card. Never exceed 50 without pruning first.
 

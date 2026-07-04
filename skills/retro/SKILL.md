@@ -42,7 +42,7 @@ update its `date` and `## Example` section instead of creating a duplicate.
 ```
 ---
 pattern: <one-line anti-pattern description>
-severity: low|medium|high
+severity: low|medium|high  # CRITICAL→high
 source: retro
 date: YYYY-MM-DD
 ---
@@ -65,6 +65,11 @@ Read all cards in `.claude/octo/lessons/`. Perform curator duties:
   Keep the card with the richer `## Example`; absorb the other's date if it is newer.
 - **Prune outgrown lessons** — cards that described a temporary workaround, a now-fixed
   framework bug, or a pattern the codebase has since eliminated. Delete them.
+  Deletion bounds: never delete a card younger than 14 days or created in this session;
+  declare a card 'outgrown' only with evidence (the pattern no longer exists in the code —
+  name what you checked); list every deleted card with its reason in the retro report —
+  deletions must be visible, never silent. When enforcing caps, prefer merging over deleting,
+  and among deletion candidates pick lowest-severity first, breaking ties by oldest.
 - **Enforce caps** — after merging and pruning, confirm project ≤ 50, global ≤ 20. If still
   over cap, prune the lowest-severity or oldest cards until within limits.
 - **Enforce card length** — any card body exceeding 25 lines is trimmed to the most essential
