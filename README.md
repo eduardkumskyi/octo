@@ -10,8 +10,20 @@ Agent Skills format.
     /plugin marketplace add eduardkumskyi/claude-octo
     /plugin install octo
 
-Other harnesses: `adapters/install.sh` arrives in Plan 4 (symlinks skills into
-`~/.claude/skills` and `~/.agents/skills`; see docs/specs for the compatibility matrix).
+## Other harnesses
+
+`./adapters/install.sh` symlinks skills into `~/.claude/skills` and `~/.agents/skills`,
+and agents into `~/.claude/agents`. This enables octo skills to work natively across
+OpenCode, Codex CLI, Cursor, Gemini CLI, and Goose:
+
+```bash
+./adapters/install.sh                 # install
+./adapters/install.sh --uninstall     # undo
+```
+
+For OpenCode hook wiring: see `adapters/opencode/README.md` (symlink-only guidance;
+`OCTO_GUARD` environment variable overrides the guard path). **Caveat:** hook wiring
+and subagent formats are per-tool; skills and scripts are the portable core.
 
 ## What's inside
 
