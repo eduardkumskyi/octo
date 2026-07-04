@@ -15,14 +15,13 @@ without inspection.
 
 ## Install
 
-Copy or symlink `octo-guard.js` into OpenCode's plugin directory for either the
-project or the user:
+Symlink `octo-guard.js` into OpenCode's plugin directory for either the project
+or the user. **Always use `ln -s` — do not copy the file** (see the warning
+below).
 
 ```bash
 # project-local (recommended)
 mkdir -p .opencode/plugins
-cp adapters/opencode/octo-guard.js .opencode/plugins/octo-guard.js
-# or symlink from the repo checkout:
 ln -s "$(pwd)/adapters/opencode/octo-guard.js" .opencode/plugins/octo-guard.js
 
 # user-global
@@ -32,6 +31,17 @@ ln -s "$(pwd)/adapters/opencode/octo-guard.js" ~/.config/opencode/plugins/octo-g
 
 OpenCode loads every `*.js` file from the plugin directories on startup; no
 further configuration is needed.
+
+> **Warning — do not copy the file.** A copied shim cannot locate `guard.sh`
+> because Node resolves `__dirname` to the copy's directory, not the repository
+> root. The shim will print an `[octo-guard] guard.sh not found — guard is
+> INACTIVE` warning on the first intercepted command and then fail-open (allow
+> everything). If you must use a copy, set the `OCTO_GUARD` environment variable
+> to the absolute path of `hooks/guard.sh` in your repository checkout:
+>
+> ```bash
+> export OCTO_GUARD=/absolute/path/to/claude-octo/hooks/guard.sh
+> ```
 
 ## Skills and CLAUDE.md
 
