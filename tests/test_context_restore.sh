@@ -17,6 +17,7 @@ echo "$OUT" | grep -q "f.txt"             || { echo "no dirty files"; exit 1; }
 echo "$OUT" | grep -q "GOAL: finish octo" || { echo "no handoff"; exit 1; }
 echo "$OUT" | grep -q "active octo run"   || { echo "no run pointer"; exit 1; }
 echo "$OUT" | grep -qi "protected"        || { echo "no rules"; exit 1; }
+echo "$OUT" | grep -q "last commits" || { echo "no commits"; exit 1; }
 
 # outside a git repo: still exits 0
 cd /; printf '{"source":"resume"}' | bash "$H" >/dev/null
