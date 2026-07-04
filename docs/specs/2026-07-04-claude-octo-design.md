@@ -21,6 +21,9 @@ designed to eliminate five measured time sinks:
 5. **Silent assumptions** — critical decisions get made without the user
    knowing; every plan/PR surfaces assumptions, and ambiguous + hard-to-reverse
    decisions come back as questions.
+6. **Progress blindness** — long tasks give no sense of where they are or how
+   much is left; every skill must expose a live step counter and current
+   activity, so "how far along is it?" is always answerable at a glance.
 
 ## Contract (refined prompt)
 
@@ -64,6 +67,8 @@ claude-octo/
     retro/SKILL.md
     skill/SKILL.md
     studio/SKILL.md
+  statusline/
+    octo-statusline.sh     # optional: renders .claude/octo/status.json in the terminal statusline
   hooks/
     hooks.json             # plugin hook wiring via ${CLAUDE_PLUGIN_ROOT}
     guard.sh               # PreToolUse safety guard
@@ -123,6 +128,14 @@ never push to protected branches, never `--no-verify`.
 - **Loop caps**: every loop has a numeric exit — build test loop max 5 cycles,
   review loop max 3 iterations, studio milestone max 2 re-plans — after which
   the skill stops and reports honestly rather than spinning.
+- **Progress contract (pain point 6)**: on start, every multi-step skill
+  registers its step plan in the native task list (TaskCreate), so the user
+  watches a live checklist tick — never a bare spinner. Loops report
+  `iteration k/cap` every cycle; fan-outs report `n/m lanes done` as lanes
+  land. Long-running skills additionally write a one-line status to
+  `.claude/octo/status.json` after each step (phase, step x/y, current
+  activity) for the statusline. **No fake ETAs** — remaining steps and a size
+  class (S/M/L) are honest; invented minutes are not.
 
 ### /octo:plan `<task>`
 Architect agent explores (parallel Explore subagents for disjoint areas of a
@@ -330,6 +343,10 @@ Everything project-specific lives in the **host project**, read by the plugin:
 - `.claude/handoff.md` — written by /octo:handoff, read by context-restore.
 - `.claude/octo/lessons/` — written by /review, /debug, /retro; read by
   reviewer, implementer, architect.
+- `.claude/octo/status.json` — one-line progress state (phase, step x/y,
+  current activity); written by long-running skills, rendered by the optional
+  statusline script (opt-in via `statusLine` in user settings; README shows
+  the one-liner).
 
 ## vwd-backend migration (phase 2, after plugin works)
 
@@ -398,4 +415,5 @@ Each hook: one pass + one block/degrade case. Each skill: one happy path.
 | /octo:pr | feature branch | PR with Assumptions section, no AI attribution |
 | /octo:studio | toy mission (e.g. CLI game) | contract → milestones VERIFIED → decisions.md populated → delivery report; `--resume` mid-run works |
 | /octo:retro | session with corrections | lesson cards created, duplicates merged |
+| Progress contract | any /octo:build run | task-list checklist visible from step 1; status.json updated per step; loop ticks show k/cap |
 | CLAUDE.md absent | /octo:build in bare repo | explicit warning + offer to scaffold, no silent defaults |
