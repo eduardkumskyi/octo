@@ -1,8 +1,8 @@
-# octo — v0.9.1
+# octo — v0.10.0
 
-Portable AI-agent workflow toolkit for Claude Code: plan → implement → test → review → PR,
+Portable AI-agent workflow toolkit for Claude Code: spec → plan → implement → test → review → PR,
 with a lessons engine that turns every bug into institutional memory. The five specialist
-agents and twelve skills cover the full dev cycle; hooks keep the session safe and stateful.
+agents and thirteen skills cover the full dev cycle; hooks keep the session safe and stateful.
 Harness-neutral core (open Agent Skills format + plain scripts + on-disk state). Every bug
 leaves a scar; octo remembers.
 
@@ -27,10 +27,11 @@ notice. All hooks are tested: `bash tests/run.sh`.
 - **reviewer** — parameterized review by lens (bugs, security, performance, simplicity)
 - **verifier** — confirms a change works by running the real app
 
-**Twelve skills:**
+**Thirteen skills:**
 
 | Skill | What it does |
 |---|---|
+| `/octo:spec` | Turn an idea into a reviewed design doc before any planning: a one-question-at-a-time interview, then a spec covering architecture, data flow, error handling, and testing, self-reviewed for placeholders and contradictions; feeds `/octo:plan` |
 | `/octo:plan` | Explore the codebase and produce an implementation plan with numbered, independently verifiable tasks; surfaces every assumption (SAFE/RISKY); RISKY + hard-to-reverse decisions come back as questions before the plan is final |
 | `/octo:implement` | Supervised execution of a plan task-by-task: implementer writes code, test-engineer adds tests, targeted tests run, user checkpoint between batches; file-disjoint tasks run in parallel |
 | `/octo:build` | Autonomous task mode: plan gate → implement + test in parallel where file-disjoint → targeted tests until green (max 5 cycles) → review until clean (max 3 iterations) → full-suite gate per project weight → offer PR. One command, no mid-run questions after the gate |

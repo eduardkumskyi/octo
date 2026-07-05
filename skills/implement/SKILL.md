@@ -69,6 +69,15 @@ same-name matches, and import heuristics — in that order. Print the selection 
 before running. If a test fails, include the name, assertion, and diagnosis in the batch report.
 
 
+### Step 6b — Spec-compliance review
+
+After tests pass, dispatch one **reviewer agent** check for the completed batch (single
+dispatch, spec-compliance lens only): does the diff match exactly what the batch's plan tasks
+demanded — nothing missing, nothing extra? Missing or extra changes are reported at the Step 7
+checkpoint so the user can decide before the next batch begins; do not silently carry them
+forward.
+
+
 ### Step 7 — User checkpoint  ← STOP
 
 Present a brief batch report:

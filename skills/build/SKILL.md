@@ -90,8 +90,12 @@ scope. After one retry, record the failure in the batch summary and continue rem
 no silent truncation.
 
 At dispatch time, write each lane to `.claude/octo/run/state.json` (agent, task, started=now).
-After each completed batch, clear and rewrite lanes in `.claude/octo/run/state.json` and
-append to `.claude/octo/run/events.jsonl`:
+After each completed batch, dispatch one **reviewer agent** check (single dispatch,
+spec-compliance lens only): does the diff match exactly what the batch's plan tasks demanded —
+nothing missing, nothing extra? Missing or extra changes must be fixed before the next batch
+begins (unattended rule applies — choose the most reversible fix and record it as an
+Assumption). Clear and rewrite lanes in `.claude/octo/run/state.json` and append to
+`.claude/octo/run/events.jsonl`:
 `{"ts": "<ISO>", "type": "batch", "tasks": ["<task-id>", ...], "status": "done|partial"}`.
 
 
