@@ -16,9 +16,11 @@ Steps: (1) clarify, (2) register-progress, (3) scaffold, (4) validate, (5) commi
 
 Before scaffolding, read these files — they are the source of truth for the formats you must follow:
 
-- **Skill frontmatter + body**: `skills/plan/SKILL.md` (in the octo repo)
-- **Agent frontmatter + body**: `agents/architect.md` (in the octo repo)
-- **Hook event names and structure**: `hooks/hooks.json` (in the octo repo)
+**OCTO_ROOT** = `${CLAUDE_PLUGIN_ROOT}` when set; otherwise two directories above this skill's base directory (`skills/<name>/` sits at `<plugin-root>/skills/<name>/`). Resolve once at start.
+
+- **Skill frontmatter + body**: `$OCTO_ROOT/skills/plan/SKILL.md`
+- **Agent frontmatter + body**: `$OCTO_ROOT/agents/architect.md`
+- **Hook event names and structure**: `$OCTO_ROOT/hooks/hooks.json`
 
 Never guess formats from memory. Read the canonical files first.
 

@@ -6,6 +6,8 @@ argument-hint: "<task description>"
 
 ## Progress Contract
 
+**OCTO_ROOT** = `${CLAUDE_PLUGIN_ROOT}` when set; otherwise two directories above this skill's base directory (`skills/<name>/` sits at `<plugin-root>/skills/<name>/`). Resolve once at start.
+
 Register these steps as a native task list at the start of Step 1, before any exploration.
 After each step, update `.claude/octo/status.json` with
 `{"phase": <step-name>, "step": <N>, "activity": <short-string>}`.
@@ -109,7 +111,7 @@ print the selection and rationale before each run.
 If tests fail, dispatch the **implementer agent** to fix failures and re-run. Repeat for at
 most **5 cycles total**. If tests are still red after cycle 5: stop immediately, report every
 failure with name, assertion, and diagnosis — **never claim done over red**. Run
-`bash scripts/notify.sh "octo build" "blocked: tests red after 5 cycles"`, write final
+`bash "$OCTO_ROOT/scripts/notify.sh" "octo build" "blocked: tests red after 5 cycles"`, write final
 `.claude/octo/run/state.json`, append
 `{"ts": "<ISO>", "type": "blocked", "reason": "tests red after 5 cycles"}`
 to `.claude/octo/run/events.jsonl`, and exit.
@@ -129,7 +131,7 @@ After each review pass, append one event per confirmed finding:
 (studio inherits this via composition — add no duplicate text there.)
 
 If review exits at cap with residual confirmed findings: HIGH/CRITICAL residuals → treat as
-blocked (run `bash scripts/notify.sh "octo build" "blocked: unresolved HIGH/CRITICAL findings"`,
+blocked (run `bash "$OCTO_ROOT/scripts/notify.sh" "octo build" "blocked: unresolved HIGH/CRITICAL findings"`,
 write `.claude/octo/run/state.json`, append
 `{"type": "blocked", "reason": "unresolved HIGH/CRITICAL findings"}`
 event to `.claude/octo/run/events.jsonl`, stop and report — never proceed over unresolved
@@ -147,13 +149,13 @@ Unattended rule: any new ambiguity → choose the most reversible option and app
 Run the full test suite plus lint. Exception: if `CLAUDE.md` declares `weight: heavy`, run
 targeted tests only and state that explicitly — the gate is never silently skipped.
 
-On gate failure: run `bash scripts/notify.sh "octo build" "blocked: final gate failed"`,
+On gate failure: run `bash "$OCTO_ROOT/scripts/notify.sh" "octo build" "blocked: final gate failed"`,
 write final `.claude/octo/run/state.json`, append
 `{"ts": "<ISO>", "type": "blocked", "reason": "final gate failed"}`
 to `.claude/octo/run/events.jsonl`, report all failures, and exit.
 
 On gate success:
-1. Run `bash scripts/notify.sh "octo build" "done: <mission>"`.
+1. Run `bash "$OCTO_ROOT/scripts/notify.sh" "octo build" "done: <mission>"`.
 2. Produce the final report as a markdown table (columns: Step | Result) listing every step outcome, followed by an Assumptions list (all [SAFE]/[RISKY] items recorded during the run) and any residual LOW/MEDIUM findings from the review step.
 3. **Offer** to run `/octo:pr` — do **not** auto-create the PR.
 
@@ -170,7 +172,7 @@ Update status: `{"phase": "final-gate", "step": 6, "activity": "done"}`.
 - Never push directly to protected branches (protected branches — see the octo guard's list).
 - Never use `--no-verify` or force-push.
 - Fan-out cap: **10 parallel lanes**; retry once, then report the gap.
-- On failure at any step: `bash scripts/notify.sh "octo build" "blocked: <reason>"`,
+- On failure at any step: `bash "$OCTO_ROOT/scripts/notify.sh" "octo build" "blocked: <reason>"`,
   overwrite `.claude/octo/run/state.json` with the final phase, append
   `{"ts": "<ISO>", "type": "blocked", "reason": "<reason>"}` to `.claude/octo/run/events.jsonl`,
   and report.

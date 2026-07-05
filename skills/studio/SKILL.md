@@ -6,6 +6,8 @@ argument-hint: "<mission> | --resume"
 
 ## Progress Contract
 
+**OCTO_ROOT** = `${CLAUDE_PLUGIN_ROOT}` when set; otherwise two directories above this skill's base directory (`skills/<name>/` sits at `<plugin-root>/skills/<name>/`). Resolve once at start.
+
 Register these phases as a native task list at the start of Phase 1, before any interview.
 After each phase transition, update `.claude/octo/status.json` with
 `{"phase": <phase-name>, "step": <N>, "activity": <short-string>}`.
@@ -146,7 +148,7 @@ Dispatch the **verifier** against the milestone's demo criteria. On `PASS`:
 
 1. `git commit` all milestone work: `type(scope): <milestone title>`.
 2. Set status `VERIFIED` in both `board.md` and `.claude/octo/run/state.json`.
-3. `bash scripts/notify.sh "octo studio" "milestone verified: <title>"`.
+3. `bash "$OCTO_ROOT/scripts/notify.sh" "octo studio" "milestone verified: <title>"`.
 4. Append: `{"ts":"<ISO>","type":"milestone","id":"<id>","title":"<title>","status":"VERIFIED"}` to `.claude/octo/run/events.jsonl`.
 5. Update status.json and advance to the next milestone.
 
@@ -157,7 +159,7 @@ consilium `REJECT`:
 
 1. Set status `PARKED` in both `board.md` and `.claude/octo/run/state.json`.
 2. Append a decisions.md entry (D\<n\>) capturing the question, ruling, and reason for parking.
-3. `bash scripts/notify.sh "octo studio" "milestone parked: <title>"`.
+3. `bash "$OCTO_ROOT/scripts/notify.sh" "octo studio" "milestone parked: <title>"`.
 4. Append: `{"ts":"<ISO>","type":"milestone","id":"<id>","title":"<title>","status":"PARKED"}` to `.claude/octo/run/events.jsonl`.
 5. Continue to the next milestone — parked milestones appear in the delivery report.
 
@@ -199,13 +201,13 @@ If ALL milestones are `PARKED`, skip the verifier and go straight to the INCOMPL
    - **Recorded assumptions** — every `type: assumption` event from events.jsonl, with labels.
    - **Known limitations** — anything discovered during the run that falls outside contract scope,
      plus any LOW/MEDIUM review residuals carried from milestone inner loops.
-   Then: `bash scripts/notify.sh "octo studio" "delivery ready: <mission>"`;
+   Then: `bash "$OCTO_ROOT/scripts/notify.sh" "octo studio" "delivery ready: <mission>"`;
    append `{"ts":"<ISO>","type":"delivery","mission":"<mission>","milestones_verified":<N>,"milestones_parked":<N>}`
    to `.claude/octo/run/events.jsonl`.
 
    On acceptance fail: produce the same delivery report but headline it **INCOMPLETE** — what was
    built, which acceptance criteria are unmet and why, parked milestones, recommended next runs.
-   `bash scripts/notify.sh "octo studio" "delivery incomplete: <mission>"`. Never present an
+   `bash "$OCTO_ROOT/scripts/notify.sh" "octo studio" "delivery incomplete: <mission>"`. Never present an
    incomplete run as delivered.
 
 3. Update status: `{"phase":"delivery","step":5,"activity":"done"}`.
@@ -222,6 +224,6 @@ Change requests become a **new, smaller studio run** — the current run is clos
 - Never push directly to protected branches (protected branches — see the octo guard's list).
 - Never use `--no-verify` or force-push.
 - Fan-out cap: **10 parallel lanes**; retry a lane once on error, then report the gap.
-- On any blocked event: `bash scripts/notify.sh "octo studio" "blocked: <reason>"`,
+- On any blocked event: `bash "$OCTO_ROOT/scripts/notify.sh" "octo studio" "blocked: <reason>"`,
   overwrite `.claude/octo/run/state.json` with the current phase, append
   `{"ts":"<ISO>","type":"blocked","reason":"<reason>"}` to `.claude/octo/run/events.jsonl`, and report.

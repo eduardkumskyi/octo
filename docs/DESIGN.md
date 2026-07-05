@@ -70,9 +70,9 @@ claude-octo/
     retro/SKILL.md
     skill/SKILL.md
     studio/SKILL.md
-  statusline/
+  statusline/               # REMOVED v0.6.0
     octo-statusline.sh     # optional: renders .claude/octo/status.json in the terminal statusline
-  dashboard/
+  dashboard/                # REMOVED v0.5.0
     index.html             # Mission Control — self-contained, polls run state
     serve.sh               # python3 -m http.server wrapper, fixed port + open browser
   terminal/
@@ -86,7 +86,8 @@ claude-octo/
     auto-format.sh         # PostToolUse formatter
     context-restore.sh     # SessionStart(compact|resume) context re-injection
     verify-done.sh         # Stop-time "did you actually verify?" notice
-  docs/specs/              # this document
+  docs/
+    DESIGN.md              # this document
   README.md                # install + usage + per-project config reference
 ```
 
