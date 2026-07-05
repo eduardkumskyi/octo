@@ -6,8 +6,7 @@ argument-hint: "[--staged | --branch | --report-only | <paths>]"
 
 ## Progress Contract
 
-Register these steps as a native task list at Step 1, before beginning. After each step, update
-`.claude/octo/status.json` with `{"phase": <step-name>, "step": <N>, "activity": <short-string>}`.
+Register these steps as a native task list at Step 1, before beginning.
 Report progress as "N steps remaining, size class S/M/L" — never wall-clock ETAs.
 Report loop progress as `iteration k/3` and `n/4 lenses done`.
 
@@ -33,7 +32,6 @@ many files are in the diff.
 
 If the diff is **empty**: report "no changes detected" and exit. Do not start the review loop.
 
-Update status: `{"phase": "resolve-diff", "step": 1, "activity": "diff computed"}`.
 
 ### Step 2 — Review fan-out  ← one pass per iteration
 
@@ -45,7 +43,6 @@ output format here; the reviewer agent owns those (see `agents/reviewer.md`).
 Report `iteration k/3` at the start of each pass. Report `n/4 lenses done` as each subagent
 returns.
 
-Update status: `{"phase": "review-fan-out", "step": 2, "activity": "iteration k/3 dispatched"}`.
 
 ### Step 3 — Adversarial verification
 
@@ -60,7 +57,6 @@ Model scales with stakes — `haiku` for LOW or MEDIUM severity; `inherit` for H
 
 Finding severity comes from the reviewer agent's rubric (CRITICAL/HIGH/MEDIUM/LOW).
 
-Update status: `{"phase": "adversarial-verify", "step": 3, "activity": "k findings confirmed"}`.
 
 ### Step 4 — Apply fixes  ← STOP if --report-only
 
@@ -71,7 +67,6 @@ Otherwise, dispatch the **implementer agent** with the full list of confirmed fi
 implementer applies fixes to the working tree. After fixes, recompute the diff on the updated
 state.
 
-Update status: `{"phase": "apply-fixes", "step": 4, "activity": "fixes applied or skipped"}`.
 
 ### Step 5 — Write lesson cards
 
@@ -101,7 +96,6 @@ Body ≤ 25 lines, two required sections:
 inline mini-retro: identify near-duplicates and outgrown lessons, merge or prune them, then add
 the new card. Never exceed 50 without pruning first.
 
-Update status: `{"phase": "write-lessons", "step": 5, "activity": "lesson cards written"}`.
 
 ### Step 6 — Iterate or conclude
 
@@ -118,7 +112,6 @@ Otherwise increment the iteration counter. Recompute the diff for the next pass:
 `git diff <resolved-base>` (working tree against base — captures both the branch's commits and
 uncommitted fixes applied in Step 4). Return to Step 2 with the recomputed diff.
 
-Update status: `{"phase": "conclude", "step": 6, "activity": "loop complete"}`.
 
 ---
 

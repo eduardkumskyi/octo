@@ -6,8 +6,7 @@ argument-hint: "[plan-file]"
 
 ## Progress Contract
 
-Register these steps as a native task list at Step 2, immediately after the plan is resolved. After each step, update
-`.claude/octo/status.json` with `{"phase": <step-name>, "step": <N>, "activity": <short-string>}`.
+Register these steps as a native task list at Step 2, immediately after the plan is resolved.
 Report progress as "N steps remaining, size class S/M/L" — never wall-clock ETAs.
 
 Register steps in the native task list named `🐙 <n>/<total> — <step name>`; update each to in_progress/completed as you go — the checklist is the user's primary progress view.
@@ -28,14 +27,12 @@ Steps: (1) resolve-plan, (2) register-progress, (3) partition-tasks, then per ba
 Find the plan: use the explicit arg if given; otherwise list `.claude/plans/`, sort by name,
 pick the last entry. Print the resolved path.
 
-Update status: `{"phase": "resolve-plan", "step": 1, "activity": "plan resolved"}`.
 
 ### Step 2 — Register progress
 
 Create the native task list for this session. For each plan task, create one native task entry.
 This is the single source of truth for human-visible progress.
 
-Update status: `{"phase": "register-progress", "step": 2, "activity": "task list created"}`.
 
 ### Step 3 — Partition tasks
 
@@ -44,7 +41,6 @@ plan's Implementation Steps). Two tasks are **file-disjoint** if their affected-
 not intersect. Group consecutive file-disjoint tasks into a single parallel batch; tasks
 sharing files with any in-progress batch are deferred until that batch completes.
 
-Update status: `{"phase": "partition-tasks", "step": 3, "activity": "batches formed"}`.
 
 ### Step 4 — Implement batch
 
@@ -56,7 +52,6 @@ and relevant lessons from `.claude/octo/lessons/*.md`.
 with a narrowed scope. After one retry, report the failure in the batch summary and continue
 with the remaining lanes — no silent truncation.
 
-Update status: `{"phase": "implement-batch", "step": 4, "activity": "implementers dispatched"}`.
 
 ### Step 5 — Test batch
 
@@ -64,7 +59,6 @@ Dispatch the **test-engineer agent** with: the batch's changed files, the implem
 (including the `For test-engineer:` section from each agent's Output Format), and the plan task
 description. The test-engineer writes tests for all tasks in the batch.
 
-Update status: `{"phase": "test-batch", "step": 5, "activity": "test-engineer complete"}`.
 
 ### Step 6 — Run targeted tests
 
@@ -73,7 +67,6 @@ map changed source paths to test files via explicit rules in `CLAUDE.md`, mirror
 same-name matches, and import heuristics — in that order. Print the selection and rationale
 before running. If a test fails, include the name, assertion, and diagnosis in the batch report.
 
-Update status: `{"phase": "run-tests", "step": 6, "activity": "tests complete"}`.
 
 ### Step 7 — User checkpoint  ← STOP
 
@@ -88,7 +81,6 @@ Append any new [SAFE]/[RISKY] assumptions from implementer or test-engineer outp
 
 **STOP.** Use AskUserQuestion: "Batch N done — continue?" with options: Continue / Adjust next batch / Stop here. If the user requests changes, dispatch the implementer for corrections, re-run tests, then re-present this checkpoint.
 
-Update status: `{"phase": "checkpoint", "step": 7, "activity": "awaiting user"}`.
 
 ### Step 8 — Conclude
 
@@ -97,7 +89,6 @@ After all batches are approved and complete, report:
 - Aggregate list of files changed
 - Any open items that could not be resolved
 
-Update status: `{"phase": "conclude", "step": 8, "activity": "done"}`.
 
 ---
 

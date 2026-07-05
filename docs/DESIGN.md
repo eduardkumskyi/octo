@@ -75,7 +75,7 @@ claude-octo/
   dashboard/                # REMOVED v0.5.0
     index.html             # Mission Control — self-contained, polls run state
     serve.sh               # python3 -m http.server wrapper, fixed port + open browser
-  terminal/
+  terminal/               # REMOVED v0.9.0
     octo-anim.py           # one-line braille-wave animation + live status (IMPLEMENTED)
   adapters/
     opencode/              # JS plugin shim: tool.execute.before → guard.sh, agents transform
@@ -98,7 +98,7 @@ octo is **not** tied to one harness. The layering, from most to least portable:
 | Layer | Portability | Basis |
 |---|---|---|
 | Skills (SKILL.md) | **Universal** | Agent Skills is an open standard (agentskills.io, Linux-Foundation-adjacent ecosystem) supported by ~40 tools: Claude Code, OpenCode, Codex CLI, Cursor, Gemini CLI, Goose, Copilot, … Strict spec frontmatter (name + description) keeps us compliant. |
-| Scripts & state (guard.sh, status.json, events.jsonl, lessons, dashboard, octo-anim) | **Universal** | Plain shell/python + JSON files — no harness API at all. |
+| Scripts & state (guard.sh, events.jsonl, lessons) | **Universal** | Plain shell/python + JSON files — no harness API at all. |
 | Project rules | **Universal** | `AGENTS.md` is the cross-tool standard (20+ tools); ship AGENTS.md as source of truth, symlink CLAUDE.md → AGENTS.md. |
 | Hook *logic* | **Near-universal** | Guard scripts read JSON on stdin and exit 2 to block — that exact protocol works verbatim in Claude Code (PreToolUse), Codex CLI (PreToolUse, behind a feature flag), and Gemini CLI (BeforeTool). OpenCode needs a ~30-line JS shim (`tool.execute.before` → spawn guard.sh → throw on exit 2). |
 | Hook *wiring* + subagent defs | **Per-tool adapters** | Each harness registers hooks differently; subagent .md formats differ in fields (Cursor reads `.claude/agents/`; OpenCode wants `mode`/`permission` instead of `tools`). Small transform per tool. |
@@ -162,10 +162,8 @@ never push to protected branches, never `--no-verify`.
   registers its step plan in the native task list (TaskCreate), so the user
   watches a live checklist tick — never a bare spinner. Loops report
   `iteration k/cap` every cycle; fan-outs report `n/m lanes done` as lanes
-  land. Long-running skills additionally write a one-line status to
-  `.claude/octo/status.json` after each step (phase, step x/y, current
-  activity) for the statusline. **No fake ETAs** — remaining steps and a size
-  class (S/M/L) are honest; invented minutes are not.
+  land. **No fake ETAs** — remaining steps and a size class (S/M/L) are
+  honest; invented minutes are not.
 
 ### /octo:plan `<task>`
 Architect agent explores (parallel Explore subagents for disjoint areas of a
@@ -379,19 +377,14 @@ JSON state, served by a python3-stdlib one-liner. No node, no build step.
 verified, run blocked/needs input, delivery ready — so you can walk away and
 get pinged, which is the actual workflow studio mode promises.
 
-The statusline script remains the lightweight always-on option; Mission
-Control is for build/studio runs. Both read the same state files. A third,
-minimal tier already exists: `terminal/octo-anim.py` — a one-line flowing
-braille wave next to the octo mark, with the same `status.json` rendered
-inline (`🐙 ⠤⢄⣀⡠⠔⠒⠉⠉⠒⠤ build · step 3/7`); no colors, `--plain` for
-emoji-less terminals. `/octo:watch --terminal` runs it instead of the browser
-dashboard. The
-dashboard UI itself is built with the frontend-design skill at implementation
+The dashboard UI itself is built with the frontend-design skill at implementation
 time — it's the README hero screenshot, treat it accordingly.
 
 v0.5.0: the browser dashboard was removed in favor of the terminal statusline + wave; the run-state contract is unchanged.
 
 v0.6.0: statusline removed — it required manual settings; zero-setup principle: the plugin must be fully functional immediately after install. Native task checklist is the default progress surface; status.json remains for the terminal wave.
+
+v0.9.0: terminal wave + status.json feed removed — the native task checklist is the sole progress surface.
 
 ## Hooks (`hooks/hooks.json`)
 
@@ -424,10 +417,6 @@ Everything project-specific lives in the **host project**, read by the plugin:
 - `.claude/handoff.md` — written by /octo:handoff, read by context-restore.
 - `.claude/octo/lessons/` — written by /review, /debug, /retro; read by
   reviewer, implementer, architect.
-- `.claude/octo/status.json` — one-line progress state (phase, step x/y,
-  current activity); written by long-running skills, rendered by the optional
-  statusline script (opt-in via `statusLine` in user settings; README shows
-  the one-liner).
 - `.claude/octo/run/state.json` + `events.jsonl` — Mission Control data
   (snapshot + append-only event log); written by build/studio steps, read by
   the dashboard and the pace-based ETA.
@@ -499,7 +488,7 @@ Each hook: one pass + one block/degrade case. Each skill: one happy path.
 | /octo:pr | feature branch | PR with Assumptions section, no AI attribution |
 | /octo:studio | toy mission (e.g. CLI game) | contract → milestones VERIFIED → decisions.md populated → delivery report; `--resume` mid-run works |
 | /octo:retro | session with corrections | lesson cards created, duplicates merged |
-| Progress contract | any /octo:build run | task-list checklist visible from step 1; status.json updated per step; loop ticks show k/cap |
+| Progress contract | any /octo:build run | task-list checklist visible from step 1; loop ticks show k/cap |
 | /octo:watch | during a /octo:build run | dashboard opens, lanes/board/burndown update live; ETA appears only after ≥2 completed units, with its basis shown |
 | Notifications | studio milestone verified | desktop notification fires (osascript/notify-send) |
 | CLAUDE.md absent | /octo:build in bare repo | explicit warning + offer to scaffold, no silent defaults |

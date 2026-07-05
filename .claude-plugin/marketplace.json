@@ -5,7 +5,7 @@
     {
       "name": "octo",
       "source": "./",
-      "description": "Portable AI-agent workflow toolkit: plan, build, review-until-clean, lessons engine, studio mode, terminal-first progress."
+      "description": "Portable AI-agent workflow toolkit: plan, build, review-until-clean, lessons engine, studio mode. Progress via the native task checklist — zero setup."
     }
   ]
 }

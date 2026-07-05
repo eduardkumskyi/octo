@@ -6,8 +6,7 @@ argument-hint: "<task description>"
 
 ## Progress Contract
 
-Register these steps as a native task list at Step 2, before beginning exploration. After each step, update
-`.claude/octo/status.json` with `{"phase": <step-name>, "step": <N>, "activity": <short-string>}`.
+Register these steps as a native task list at Step 2, before beginning exploration.
 Report progress as "N steps remaining, size class S/M/L" — never wall-clock ETAs.
 
 Register steps in the native task list named `🐙 <n>/<total> — <step name>`; update each to in_progress/completed as you go — the checklist is the user's primary progress view.
@@ -26,14 +25,12 @@ Read the host project's `CLAUDE.md`. If it is absent or missing a needed section
 - Detect what you can from repo artifacts (lockfiles, `Makefile`, `pyproject.toml`, CI config,
   `package.json`). Label every inferred convention `[DETECTED]`.
 
-Update status: `{"phase": "read-project-context", "step": 1, "activity": "read CLAUDE.md"}`.
 
 ### Step 2 — Register progress
 
 Create the native task list for this session (all six steps). This is the single source of
 truth for human-visible progress — do not maintain a separate running log.
 
-Update status: `{"phase": "register-progress", "step": 2, "activity": "task list created"}`.
 
 ### Step 3 — Explore
 
@@ -50,7 +47,6 @@ narrower scope. After one retry, report the gap in `## Open Questions` rather th
 If two subagents return contradictory findings about the same area, surface the conflict in Open
 Questions — never resolve it silently.
 
-Update status: `{"phase": "explore", "step": 3, "activity": "parallel subagents dispatched"}`.
 
 ### Step 4 — Author the plan
 
@@ -68,7 +64,6 @@ lessons from `.claude/octo/lessons/*.md`. The architect produces:
 
 Do not restate the architect's output — use it verbatim as the plan body.
 
-Update status: `{"phase": "author-plan", "step": 4, "activity": "architect agent complete"}`.
 
 ### Step 5 — Assumption gate  ← STOP
 
@@ -79,7 +74,6 @@ Scan the `## Assumptions` section for any item marked `RISKY` where the conseque
 
 If no RISKY + hard-to-reverse items exist, proceed immediately.
 
-Update status: `{"phase": "assumption-gate", "step": 5, "activity": "gate cleared or awaiting user"}`.
 
 ### Step 6 — Save and register
 
@@ -94,7 +88,6 @@ Update status: `{"phase": "assumption-gate", "step": 5, "activity": "gate cleare
 
 4. Report the saved path and the total step count to the user.
 
-Update status: `{"phase": "save-and-register", "step": 6, "activity": "plan saved"}`.
 
 ---
 

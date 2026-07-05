@@ -6,8 +6,7 @@ argument-hint: ""
 
 ## Progress Contract
 
-Register these steps as a native task list at Step 1, before beginning. After each step, update
-`.claude/octo/status.json` with `{"phase": <step-name>, "step": <N>, "activity": <short-string>}`.
+Register these steps as a native task list at Step 1, before beginning.
 Report progress as "N steps remaining, size class S/M/L" — never wall-clock ETAs.
 
 Steps: (1) mine-session, (2) write-cards, (3) curate.
@@ -31,7 +30,6 @@ how to detect or prevent recurrence. Deduplicate candidates before proceeding.
 Print a summary: `"N candidate lessons found (a: X, b: Y, c: Z)."` If zero, exit — no cards
 to write, no curation needed.
 
-Update status: `{"phase": "mine-session", "step": 1, "activity": "candidates identified"}`.
 
 ### Step 2 — Write cards
 
@@ -56,7 +54,6 @@ Write to `~/.claude/octo/lessons/` only when the lesson is about YOUR habits acr
 Before writing each card, count existing cards. If at cap, run the inline mini-retro in
 Step 3 first, then return here to write.
 
-Update status: `{"phase": "write-cards", "step": 2, "activity": "cards written"}`.
 
 ### Step 3 — Curate
 
@@ -78,7 +75,6 @@ Read all cards in `.claude/octo/lessons/`. Perform curator duties:
 
 Print a curation summary: cards added, merged, pruned, and final count.
 
-Update status: `{"phase": "curate", "step": 3, "activity": "curation complete"}`.
 
 ---
 

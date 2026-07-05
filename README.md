@@ -1,4 +1,4 @@
-# octo — v0.8.2
+# octo — v0.9.0
 
 Portable AI-agent workflow toolkit for Claude Code: plan → implement → test → review → PR,
 with a lessons engine that turns every bug into institutional memory. The five specialist
@@ -18,8 +18,6 @@ configuration required.
 
 `hooks/` — safety guard, file-scoped auto-format, compaction context restore, verification
 notice. All hooks are tested: `bash tests/run.sh`.
-
-`terminal/octo-anim.py` — live animated wave: `🐙 ⠤⢄⣀⡠⠔⠒⠉⠉⠒⠤  build · step 3/7`.
 
 **Five agents:**
 
@@ -55,14 +53,13 @@ is modified unless you choose to, and pushes are never automatic.
 ## Watching progress
 
 Every skill registers steps in Claude Code's native task list — progress is visible
-in-session with no setup.
+in-session with zero setup. The native task checklist is the sole progress surface.
 
-For a live animated view, run in a second terminal while a build or studio run is active:
+Machine tap: `.claude/octo/run/state.json` and `events.jsonl` are written continuously
+for build and studio runs if you want to build your own view.
 
-    python3 <path-to-octo>/terminal/octo-anim.py
-
-Machine tap: `.claude/octo/run/state.json`, `events.jsonl`, and `.claude/octo/status.json`
-are written continuously if you want to build your own view.
+Desktop notifications on milestone verified, blocked, and delivery events fire automatically
+via `scripts/notify.sh` (macOS `osascript`, Linux `notify-send`) — no configuration needed.
 
 ## The lessons engine
 

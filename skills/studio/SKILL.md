@@ -9,8 +9,6 @@ argument-hint: "<mission> | --resume"
 **OCTO_ROOT** = `${CLAUDE_PLUGIN_ROOT}` when set; otherwise two directories above this skill's base directory (`skills/<name>/` sits at `<plugin-root>/skills/<name>/`). Resolve once at start.
 
 Register these phases as a native task list at the start of Phase 1, before any interview.
-After each phase transition, update `.claude/octo/status.json` with
-`{"phase": <phase-name>, "step": <N>, "activity": <short-string>}`.
 Report progress as "N phases remaining, milestone M of K" — never wall-clock ETAs.
 
 Register steps in the native task list named `🐙 <milestone-id> <n>/<total> — <step>`; update each to in_progress/completed as you go — the checklist is the user's primary progress view.
@@ -19,7 +17,7 @@ Phases: (1) contract, (2) consilium-setup, (3) milestone-loop, (4) resume, (5) d
 
 **State-write gate**: a step has not STARTED until its `state.json` overwrite and
 `events.jsonl` entry are written. Write state FIRST, then do the step's work — never the
-reverse. A growing "updated Xm ago" on the task checklist or wave means you are violating this contract.
+reverse. A growing "updated Xm ago" on the task checklist means you are violating this contract.
 
 Relationship note: build = task / hours / user nearby; studio = mission / days / user absent.
 Accepted interpretation: supervision granularity inside the inner loop is per-batch.
@@ -55,7 +53,6 @@ Initialize run state:
 - Append to `.claude/octo/run/events.jsonl`:
   `{"ts":"<ISO>","type":"start","mode":"studio","mission":"<mission>"}`.
 
-Update status: `{"phase":"contract","step":1,"activity":"contract accepted, run sealed"}`.
 
 ## Phase 2 — Consilium
 
@@ -96,7 +93,6 @@ Append to `.claude/octo/run/events.jsonl`:
 Initialize `.claude/octo/run/decisions.md` (empty header) before the first milestone starts
 so the file is always present and appendable.
 
-Update status: `{"phase":"consilium-setup","step":2,"activity":"decisions log initialized"}`.
 
 ## Phase 3 — Milestone loop
 
@@ -150,7 +146,7 @@ Dispatch the **verifier** against the milestone's demo criteria. On `PASS`:
 2. Set status `VERIFIED` in both `board.md` and `.claude/octo/run/state.json`.
 3. `bash "$OCTO_ROOT/scripts/notify.sh" "octo studio" "milestone verified: <title>"`.
 4. Append: `{"ts":"<ISO>","type":"milestone","id":"<id>","title":"<title>","status":"VERIFIED"}` to `.claude/octo/run/events.jsonl`.
-5. Update status.json and advance to the next milestone.
+5. Advance to the next milestone.
 
 On `FAIL`, `PARTIAL`, or a blocked inner loop: convene the consilium to decide whether and how
 to re-plan. If the ruling is `ACCEPT` or `ACCEPT WITH CHANGES`, apply the re-plan and restart
@@ -163,7 +159,6 @@ consilium `REJECT`:
 4. Append: `{"ts":"<ISO>","type":"milestone","id":"<id>","title":"<title>","status":"PARKED"}` to `.claude/octo/run/events.jsonl`.
 5. Continue to the next milestone — parked milestones appear in the delivery report.
 
-Update status.json after each milestone: `{"phase":"milestone-loop","step":3,"activity":"milestone <id> <VERIFIED|PARKED>"}`.
 
 ## Phase 4 — Resume & atomicity
 
@@ -184,7 +179,6 @@ When invoked with `--resume`:
 Append to `.claude/octo/run/events.jsonl`:
 `{"ts":"<ISO>","type":"resume","last_phase":"<phase from state.json>"}`.
 
-Update status: `{"phase":"resume","step":4,"activity":"state restored, continuing"}`.
 
 ## Phase 5 — Delivery
 
@@ -210,7 +204,6 @@ If ALL milestones are `PARKED`, skip the verifier and go straight to the INCOMPL
    `bash "$OCTO_ROOT/scripts/notify.sh" "octo studio" "delivery incomplete: <mission>"`. Never present an
    incomplete run as delivered.
 
-3. Update status: `{"phase":"delivery","step":5,"activity":"done"}`.
 
 The client reviews the delivery report and either accepts or files change requests.
 Change requests become a **new, smaller studio run** — the current run is closed as-is.

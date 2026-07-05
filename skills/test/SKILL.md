@@ -6,8 +6,7 @@ argument-hint: "[scope | --all]"
 
 ## Progress Contract
 
-Register these steps as a native task list at Step 1, before running. After each step, update
-`.claude/octo/status.json` with `{"phase": <step-name>, "step": <N>, "activity": <short-string>}`.
+Register these steps as a native task list at Step 1, before running.
 Report progress as "N steps remaining, size class S/M/L" — never wall-clock ETAs.
 
 Steps: (1) read-config, (2) compute-diff, (3) select-tests, (4) run-tests.
@@ -35,7 +34,6 @@ If `CLAUDE.md` is absent or missing a `test_command`:
   `Cargo.toml` → `cargo test`.
 - Announce what was detected before running.
 
-Update status: `{"phase": "read-config", "step": 1, "activity": "read CLAUDE.md"}`.
 
 ### Step 2 — Compute diff
 
@@ -51,7 +49,6 @@ If the combined diff is **empty**:
 
 If `--all` was passed, skip directly to Step 4.
 
-Update status: `{"phase": "compute-diff", "step": 2, "activity": "diff computed"}`.
 
 ### Step 3 — Select tests
 
@@ -77,7 +74,6 @@ If the selection is empty and `weight: heavy`:
 If the selection is empty and `weight: light`:
 - Report the gap and run the full suite.
 
-Update status: `{"phase": "select-tests", "step": 3, "activity": "selection printed"}`.
 
 ### Step 4 — Run tests  ← STOP when heavy + --all
 
@@ -86,7 +82,6 @@ If `weight: heavy` and `--all` was passed, confirm with the user before running 
 Run using the resolved command and `subset_syntax` for the selected files.
 For `--all` (once confirmed on heavy, or immediately on light), omit the file filter.
 
-Update status: `{"phase": "run-tests", "step": 4, "activity": "tests complete"}`.
 
 ---
 

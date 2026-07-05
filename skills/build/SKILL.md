@@ -9,8 +9,6 @@ argument-hint: "<task description>"
 **OCTO_ROOT** = `${CLAUDE_PLUGIN_ROOT}` when set; otherwise two directories above this skill's base directory (`skills/<name>/` sits at `<plugin-root>/skills/<name>/`). Resolve once at start.
 
 Register these steps as a native task list at the start of Step 1, before any exploration.
-After each step, update `.claude/octo/status.json` with
-`{"phase": <step-name>, "step": <N>, "activity": <short-string>}`.
 Report progress as "N steps remaining, size class S/M/L" — never wall-clock ETAs.
 
 Register steps in the native task list named `🐙 <n>/<total> — <step name>`; update each to in_progress/completed as you go — the checklist is the user's primary progress view.
@@ -20,7 +18,7 @@ Steps: (1) read-context, (2) plan-gate, (3) implement, (4) test-fix-loop,
 
 **State-write gate**: a step has not STARTED until its `state.json` overwrite and
 `events.jsonl` entry are written. Write state FIRST, then do the step's work — never the
-reverse. A growing "updated Xm ago" on the task checklist or wave means you are violating this contract.
+reverse. A growing "updated Xm ago" on the task checklist means you are violating this contract.
 
 ## Arguments
 
@@ -49,7 +47,6 @@ Initialize run state:
 Create the native task list for this session (all six steps). This is the single source of
 truth for human-visible progress.
 
-Update status: `{"phase": "read-context", "step": 1, "activity": "context read, run state initialized"}`.
 
 ### Step 2 — Plan and assumption gate  ← STOP
 
@@ -67,7 +64,6 @@ never silently, and never by asking the user again.
 
 Append to `.claude/octo/run/events.jsonl`:
 `{"ts": "<ISO>", "type": "step", "phase": "plan-gate", "activity": "gate cleared"}`.
-Update status: `{"phase": "plan-gate", "step": 2, "activity": "plan saved, gate cleared"}`.
 
 ### Step 3 — Implement with tests
 
@@ -98,7 +94,6 @@ After each completed batch, clear and rewrite lanes in `.claude/octo/run/state.j
 append to `.claude/octo/run/events.jsonl`:
 `{"ts": "<ISO>", "type": "batch", "tasks": ["<task-id>", ...], "status": "done|partial"}`.
 
-Update status: `{"phase": "implement", "step": 3, "activity": "all batches complete"}`.
 
 ### Step 4 — Targeted test loop (max 5 cycles)
 
@@ -118,7 +113,6 @@ to `.claude/octo/run/events.jsonl`, and exit.
 
 On success, append to `.claude/octo/run/events.jsonl`:
 `{"ts": "<ISO>", "type": "step", "phase": "test-fix-loop", "activity": "green"}`.
-Update status: `{"phase": "test-fix-loop", "step": 4, "activity": "tests green"}`.
 
 ### Step 5 — Review
 
@@ -140,7 +134,6 @@ final report.
 
 Append to `.claude/octo/run/events.jsonl`:
 `{"ts": "<ISO>", "type": "step", "phase": "review", "activity": "review complete"}`.
-Update status: `{"phase": "review", "step": 5, "activity": "review clean"}`.
 
 ### Step 6 — Final gate and hand-off
 
@@ -161,7 +154,6 @@ On gate success:
 
 Append to `.claude/octo/run/events.jsonl`:
 `{"ts": "<ISO>", "type": "complete", "mission": "<task>"}`.
-Update status: `{"phase": "final-gate", "step": 6, "activity": "done"}`.
 
 ---
 

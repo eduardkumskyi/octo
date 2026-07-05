@@ -6,8 +6,7 @@ argument-hint: "<what you want>"
 
 ## Progress Contract
 
-Register these steps as a native task list at Step 2, before doing anything else. After each step,
-update `.claude/octo/status.json` with `{"phase": <step-name>, "step": <N>, "activity": <short-string>}`.
+Register these steps as a native task list at Step 2, before doing anything else.
 Report progress as N steps remaining, size class S/M/L — never wall-clock ETAs.
 
 Steps: (1) clarify, (2) register-progress, (3) scaffold, (4) validate, (5) commit.
@@ -37,13 +36,11 @@ Determine what the user wants to author (skill, agent, or hook) and where it sho
 
 If any of these are unclear, ask one focused question per unknown before proceeding.
 
-Update status: `{"phase": "clarify", "step": 1, "activity": "target and type confirmed"}`.
 
 ### Step 2 — Register progress
 
 Create the native task list for this session (all five steps).
 
-Update status: `{"phase": "register-progress", "step": 2, "activity": "task list created"}`.
 
 ### Step 3 — Scaffold
 
@@ -73,7 +70,6 @@ Update status: `{"phase": "register-progress", "step": 2, "activity": "task list
 
 Show the draft artifact to the user and wait for approval before writing.
 
-Update status: `{"phase": "scaffold", "step": 3, "activity": "draft artifact ready"}`.
 
 ### Step 4 — Validate
 
@@ -86,7 +82,6 @@ fail, fix the artifact — do not modify the tests. Report the test output.
 - Required fields are present and non-empty.
 - Directory/filename matches the `name` field.
 
-Update status: `{"phase": "validate", "step": 4, "activity": "tests passed or file verified"}`.
 
 ### Step 5 — Commit (octo repo targets only)
 
@@ -102,7 +97,6 @@ Never include `Co-Authored-By` lines or AI attribution.
 
 For host-project targets, report the scaffolded path and leave committing to the user.
 
-Update status: `{"phase": "commit", "step": 5, "activity": "done"}`.
 
 ---
 

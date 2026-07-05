@@ -6,8 +6,7 @@ argument-hint: ""
 
 ## Progress Contract
 
-Register these steps as a native task list at Step 1, before beginning. After each step, update
-`.claude/octo/status.json` with `{"phase": <step-name>, "step": <N>, "activity": <short-string>}`.
+Register these steps as a native task list at Step 1, before beginning.
 Report progress as "N steps remaining, size class S/M/L" — never wall-clock ETAs.
 
 Steps: (1) gather-state, (2) write-handoff.
@@ -30,7 +29,6 @@ Collect the information needed for each of the five sections:
 
 Also note: current branch, any uncommitted changes, and the last commit SHA (`git rev-parse --short HEAD`).
 
-Update status: `{"phase": "gather-state", "step": 1, "activity": "state gathered"}`.
 
 ### Step 2 — Write handoff  ← overwrites previous
 
@@ -65,7 +63,6 @@ the archive — the file is a single pointer to the current resumption state, no
 
 After writing, print the first 30 lines so the user can verify they are self-sufficient.
 
-Update status: `{"phase": "write-handoff", "step": 2, "activity": "handoff written"}`.
 
 ---
 

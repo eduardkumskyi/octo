@@ -6,8 +6,7 @@ argument-hint: "<bug description>"
 
 ## Progress Contract
 
-Register these steps as a native task list at Step 1, before beginning. After each step, update
-`.claude/octo/status.json` with `{"phase": <step-name>, "step": <N>, "activity": <short-string>}`.
+Register these steps as a native task list at Step 1, before beginning.
 Report progress as "N steps remaining, size class S/M/L" — never wall-clock ETAs.
 
 Register steps in the native task list named `🐙 <n>/<total> — <step name>`; update each to in_progress/completed as you go — the checklist is the user's primary progress view.
@@ -28,7 +27,6 @@ Print the repro: command or test name, observed output, expected output.
 If reproduction fails — the bug cannot be triggered — stop and ask the user for more context.
 Do not proceed to hypotheses without a confirmed repro.
 
-Update status: `{"phase": "reproduce", "step": 1, "activity": "repro confirmed"}`.
 
 ### Step 2 — Hypothesize
 
@@ -41,7 +39,6 @@ message** — serial investigation is not acceptable when parallel dispatch halv
 Fan-out cap: 10 lanes. Each subagent receives the repro, the hypothesis, and the relevant
 source paths.
 
-Update status: `{"phase": "hypothesize", "step": 2, "activity": "subagents dispatched"}`.
 
 ### Step 3 — Falsify
 
@@ -54,7 +51,6 @@ Maximum 3 falsification rounds; if multiple hypotheses still survive, stop and p
 
 Print the surviving root cause with the evidence chain that confirms it.
 
-Update status: `{"phase": "falsify", "step": 3, "activity": "root cause confirmed"}`.
 
 ### Step 4 — Fix  ← STOP if no confirmed root cause and repro
 
@@ -69,7 +65,6 @@ a regression test before the fix lands.
 
 Verify the fix resolves the repro: re-run the regression test and confirm it passes.
 
-Update status: `{"phase": "fix", "step": 4, "activity": "fix applied and verified"}`.
 
 ### Step 5 — Record lesson  ← STOP if nothing to record
 
@@ -93,7 +88,6 @@ Body ≤ 25 lines, two required sections: `## Example` (file:line citation) and 
 Before writing, count existing cards. If at cap, run an inline mini-retro: merge near-duplicates
 and prune outgrown lessons, then add the new card. Never exceed the cap without pruning first.
 
-Update status: `{"phase": "lesson", "step": 5, "activity": "lesson card written"}`.
 
 ---
 

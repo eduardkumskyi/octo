@@ -7,8 +7,6 @@ argument-hint: "[base-branch] [--repos <path>...]"
 ## Progress Contract
 
 Register these steps as a native task list at Step 1, before any resolution work.
-After each step, update `.claude/octo/status.json` with
-`{"phase": <step-name>, "step": <N>, "activity": <short-string>}`.
 Report progress as "N steps remaining" — never wall-clock ETAs.
 
 Register steps in the native task list named `🐙 <n>/<total> — <step name>`; update each to
@@ -81,7 +79,6 @@ host repo and every confirmed companion. This is the contract for the rest of th
 
 Register the 🐙 task checklist now.
 
-Update status: `{"phase": "resolve-matrix", "step": 1, "activity": "audit matrix announced"}`.
 
 ### Step 2 — Per-repo review fan-out
 
@@ -104,7 +101,6 @@ Pass each subagent:
 
 Report `n/4 lenses done` as each subagent returns per repo.
 
-Update status: `{"phase": "per-repo-review", "step": 2, "activity": "all lenses returned"}`.
 
 ### Step 3 — Cross-repo integration lens
 
@@ -123,7 +119,6 @@ fed the diff summaries from all repos. The integration brief must cover:
 - Deploy-order risks: would deploying repos in any plausible order (backend before frontend,
   agents before backend, etc.) cause a window of breakage?
 
-Update status: `{"phase": "cross-repo-lens", "step": 3, "activity": "integration lens complete"}`.
 
 ### Step 4 — Skeptic verification pass
 
@@ -136,7 +131,6 @@ restate it here. Apply it to every finding collected from Steps 2 and 3:
 - Only REFUTED findings are dropped; UPHELD findings carry forward to the report.
 - Model scales with stakes: `haiku` for LOW/MEDIUM; `inherit` for HIGH/CRITICAL.
 
-Update status: `{"phase": "skeptic-verify", "step": 4, "activity": "k findings confirmed"}`.
 
 ### Step 5 — Report
 
@@ -148,7 +142,6 @@ contract as `/octo:review` Step 5 (write `.claude/octo/lessons/<kebab-slug>.md`;
 50-card cap, same slug/body rules). Do not write cards for MEDIUM/LOW findings unless they
 reveal a recurring anti-pattern already present in the lessons store.
 
-Update status: `{"phase": "report", "step": 5, "activity": "audit complete"}`.
 
 ---
 
@@ -223,7 +216,6 @@ with a brief rationale for each deferral.
 
 4. If "Nothing — report only": end exactly as today (no changes made).
 
-Update status: `{"phase": "fix-selection", "step": 6, "activity": "fix selection complete"}`.
 
 ---
 
