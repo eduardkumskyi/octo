@@ -15,7 +15,8 @@ Steps: (1) mine-session, (2) write-cards, (3) curate.
 
 ### Step 1 — Mine session
 
-Scan the conversation history for three signal types:
+Dispatch **three subagents in one message** — one per signal type — to mine the conversation
+history concurrently. Sequential mining of independent signal types is a defect:
 
 - **(a) User corrections** — any place the user rejected an output, flagged a mistake, or
   corrected an assumption. Extract the erroneous pattern and the correct approach.
@@ -24,8 +25,9 @@ Scan the conversation history for three signal types:
 - **(c) Debug root causes** — root causes confirmed in any `/octo:debug` run this session,
   with the evidence chain that confirmed them.
 
-For each signal, draft a candidate lesson: one-line `pattern`, severity, and a brief note on
-how to detect or prevent recurrence. Deduplicate candidates before proceeding.
+Collect all three subagent results and merge them before proceeding. For each signal, draft a
+candidate lesson: one-line `pattern`, severity, and a brief note on how to detect or prevent
+recurrence. Deduplicate candidates across all three sets.
 
 Print a summary: `"N candidate lessons found (a: X, b: Y, c: Z)."` If zero, exit — no cards
 to write, no curation needed.
@@ -92,3 +94,6 @@ escape, while the context is still available.
   no `Co-Authored-By` lines of any kind.
 - Never push directly to protected branches (protected branches — see the octo guard's list).
 - Never use `--no-verify` or force-push.
+- Parallel-first: dispatches that do not consume each other's output MUST go in a single
+  message. Dispatching sequentially what could run concurrently is a defect, not a style
+  choice. Cap ≈10 concurrent lanes; more work than lanes → batch waves.

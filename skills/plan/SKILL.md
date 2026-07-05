@@ -38,8 +38,8 @@ truth for human-visible progress — do not maintain a separate running log.
 owns thinking and plan text. Do not duplicate architect reasoning here.
 
 Partition the codebase into disjoint domains. Dispatch up to **10 parallel Explore or architect
-subagents** in a single message (one tool-use block per agent). Serial exploration is not
-acceptable when parallel dispatch halves elapsed time.
+subagents** in a single message (one tool-use block per agent) — this MUST be a single message;
+serial exploration when parallel dispatch is possible is a defect, not a style choice.
 
 **Retry rule**: if a subagent returns empty or contradictory findings, retry it once with a
 narrower scope. After one retry, report the gap in `## Open Questions` rather than blocking.
@@ -97,4 +97,6 @@ If no RISKY + hard-to-reverse items exist, proceed immediately.
   no `Co-Authored-By` lines of any kind.
 - Never push directly to protected branches (protected branches — see the octo guard's list).
 - Never use `--no-verify` or force-push.
-- Fan-out cap: **10 parallel lanes**; retry once, then report the gap.
+- Parallel-first: dispatches that do not consume each other's output MUST go in a single
+  message. Dispatching sequentially what could run concurrently is a defect, not a style
+  choice. Cap ≈10 concurrent lanes; more work than lanes → batch waves.

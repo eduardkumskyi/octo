@@ -101,7 +101,10 @@ Unattended rule: any new ambiguity → choose the most reversible option and app
 
 Run targeted tests for all changed files using /octo:test's selection logic: explicit rules in
 `CLAUDE.md` → mirrored paths → same-name matches → import heuristics, in that order. Always
-print the selection and rationale before each run.
+print the selection and rationale before each run. When the project's test command supports
+isolated invocation, targeted-test runs for independent (non-overlapping) test scopes MUST be
+dispatched concurrently in a single message — skip this if the test framework shares state
+(e.g. a single shared test DB).
 
 If tests fail, dispatch the **implementer agent** to fix failures and re-run. Repeat for at
 most **5 cycles total**. If tests are still red after cycle 5: stop immediately, report every
@@ -163,7 +166,9 @@ Append to `.claude/octo/run/events.jsonl`:
   no `Co-Authored-By` lines of any kind.
 - Never push directly to protected branches (protected branches — see the octo guard's list).
 - Never use `--no-verify` or force-push.
-- Fan-out cap: **10 parallel lanes**; retry once, then report the gap.
+- Parallel-first: dispatches that do not consume each other's output MUST go in a single
+  message. Dispatching sequentially what could run concurrently is a defect, not a style
+  choice. Cap ≈10 concurrent lanes; more work than lanes → batch waves.
 - On failure at any step: `bash "$OCTO_ROOT/scripts/notify.sh" "octo build" "blocked: <reason>"`,
   overwrite `.claude/octo/run/state.json` with the final phase, append
   `{"ts": "<ISO>", "type": "blocked", "reason": "<reason>"}` to `.claude/octo/run/events.jsonl`,

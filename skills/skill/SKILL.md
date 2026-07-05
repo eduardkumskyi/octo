@@ -106,3 +106,6 @@ For host-project targets, report the scaffolded path and leave committing to the
   no `Co-Authored-By` lines of any kind.
 - Never push directly to protected branches (protected branches — see the octo guard's list).
 - Never use `--no-verify` or force-push.
+- Parallel-first: dispatches that do not consume each other's output MUST go in a single
+  message. Dispatching sequentially what could run concurrently is a defect, not a style
+  choice. Cap ≈10 concurrent lanes; more work than lanes → batch waves.

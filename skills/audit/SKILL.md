@@ -125,7 +125,8 @@ fed the diff summaries from all repos. The integration brief must cover:
 Follow the exact same skeptic protocol as `/octo:review` Step 3 — reference it; do not
 restate it here. Apply it to every finding collected from Steps 2 and 3:
 
-- Dispatch a fresh skeptic subagent per finding with the finding verbatim and the
+- Dispatch **all skeptics in one message** (one per finding, concurrently) — sequential
+  skeptic dispatch is a defect. Each skeptic receives the finding verbatim and the
   surrounding diff hunk or file section.
 - The skeptic returns `REFUTED: <reason>` or `UPHELD: <reason>`. Uncertain ⇒ UPHELD.
 - Only REFUTED findings are dropped; UPHELD findings carry forward to the report.
@@ -206,7 +207,7 @@ with a brief rationale for each deferral.
 2. If "Let me pick individually": present the confirmed findings as multiSelect AskUserQuestion(s), batched up to 4 options per question, up to 4 questions per call (use additional calls if more findings). Option label = finding title + severity; description = the one-line failure mode.
 
 3. Fixing (only what was selected):
-   - Per repo, dispatch the implementer agent with the full list of selected findings for that repo (one dispatch per repo, not one per finding).
+   - Per repo, dispatch the implementer agent with the full list of selected findings for that repo (one dispatch per repo, not one per finding). All per-repo implementer dispatches MUST go out in one message — dispatch all repos concurrently.
    - Missing-test findings go to the test-engineer agent instead.
    - After fixes: run targeted tests via /octo:test's selection logic.
    - Then a focused skeptic-style re-check per fixed finding (reference /octo:review's verification protocol, don't restate).
@@ -225,6 +226,7 @@ with a brief rationale for each deferral.
   no `Co-Authored-By` lines of any kind.
 - Never push directly to protected branches (protected branches — see the octo guard's list).
 - Never use `--no-verify` or force-push.
-- Fan-out: all reviewer dispatches for a batch go in a **single message** — serial dispatch
-  is not acceptable when parallel execution halves elapsed time.
+- Parallel-first: dispatches that do not consume each other's output MUST go in a single
+  message. Dispatching sequentially what could run concurrently is a defect, not a style
+  choice. Cap ≈10 concurrent lanes; more work than lanes → batch waves.
 - Read-only through the report. Nothing is modified unless you select fixes at the final step; pushes are never automatic.

@@ -44,9 +44,10 @@ sharing files with any in-progress batch are deferred until that batch completes
 
 ### Step 4 — Implement batch
 
-Dispatch **one implementer subagent per task in the current batch** in a single message
-(fan-out cap: 10 lanes). Pass each subagent: the plan, its specific task, the affected files,
-and relevant lessons from `.claude/octo/lessons/*.md`.
+Dispatch **one implementer subagent per task in the current batch** in a single message —
+this MUST be a single message; serial dispatch of file-disjoint tasks is a defect, not a style
+choice. Fan-out cap: 10 lanes. Pass each subagent: the plan, its specific task, the affected
+files, and relevant lessons from `.claude/octo/lessons/*.md`.
 
 **Failure rule**: if a lane fails (agent errors or reports a RISKY blocker), retry it once
 with a narrowed scope. After one retry, report the failure in the batch summary and continue
@@ -98,4 +99,6 @@ After all batches are approved and complete, report:
   no `Co-Authored-By` lines of any kind.
 - Never push directly to protected branches (protected branches — see the octo guard's list).
 - Never use `--no-verify` or force-push.
-- Fan-out cap: **10 parallel lanes**; retry once, then report the gap.
+- Parallel-first: dispatches that do not consume each other's output MUST go in a single
+  message. Dispatching sequentially what could run concurrently is a defect, not a style
+  choice. Cap ≈10 concurrent lanes; more work than lanes → batch waves.

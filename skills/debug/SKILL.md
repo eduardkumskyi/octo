@@ -35,9 +35,9 @@ the mechanism, what evidence would confirm or refute it, and whether it can be i
 independently.
 
 Group independent hypotheses. Dispatch **one subagent per independent hypothesis in a single
-message** — serial investigation is not acceptable when parallel dispatch halves elapsed time.
-Fan-out cap: 10 lanes. Each subagent receives the repro, the hypothesis, and the relevant
-source paths.
+message** — this MUST be a single message; serial investigation when parallel dispatch is
+possible is a defect, not a style choice. Fan-out cap: 10 lanes. Each subagent receives the
+repro, the hypothesis, and the relevant source paths.
 
 
 ### Step 3 — Falsify
@@ -97,5 +97,6 @@ and prune outgrown lessons, then add the new card. Never exceed the cap without 
   no `Co-Authored-By` lines of any kind.
 - Never push directly to protected branches (protected branches — see the octo guard's list).
 - Never use `--no-verify` or force-push.
-- Fan-out: all independent-hypothesis subagents go in a **single message** — serial dispatch is
-  not acceptable when parallel execution halves elapsed time.
+- Parallel-first: dispatches that do not consume each other's output MUST go in a single
+  message. Dispatching sequentially what could run concurrently is a defect, not a style
+  choice. Cap ≈10 concurrent lanes; more work than lanes → batch waves.

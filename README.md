@@ -1,4 +1,4 @@
-# octo — v0.9.0
+# octo — v0.9.1
 
 Portable AI-agent workflow toolkit for Claude Code: plan → implement → test → review → PR,
 with a lessons engine that turns every bug into institutional memory. The five specialist
@@ -51,6 +51,8 @@ audit runs. After the report, a final question card lets you select findings to 
 is modified unless you choose to, and pushes are never automatic.
 
 ## Watching progress
+
+octo fans out agents aggressively — a build/review turn may run many subagents at once; that's the speed trade the plugin makes by design.
 
 Every skill registers steps in Claude Code's native task list — progress is visible
 in-session with zero setup. The native task checklist is the sole progress surface.

@@ -46,11 +46,12 @@ returns.
 
 ### Step 3 — Adversarial verification
 
-For each finding from Step 2, dispatch a **fresh skeptic subagent** with: (a) the finding
-verbatim (file:line + excerpt) and (b) the surrounding diff hunk or file section. The skeptic
-must return exactly `REFUTED: <reason>` or `UPHELD: <reason>`. **Uncertain ⇒ UPHELD** — the
-skeptic exists to kill clear false positives, not to shed real bugs. Only REFUTED findings are
-dropped; UPHELD findings carry forward.
+Dispatch **all skeptics for this pass's findings in one message** (one skeptic per finding,
+concurrently) — sequential skeptic dispatch is a defect, not a style choice. Each skeptic
+receives: (a) the finding verbatim (file:line + excerpt) and (b) the surrounding diff hunk or
+file section. The skeptic must return exactly `REFUTED: <reason>` or `UPHELD: <reason>`.
+**Uncertain ⇒ UPHELD** — the skeptic exists to kill clear false positives, not to shed real
+bugs. Only REFUTED findings are dropped; UPHELD findings carry forward.
 
 Model scales with stakes — `haiku` for LOW or MEDIUM severity; `inherit` for HIGH or CRITICAL
 (a cheap skeptic must never be the reason a real security bug gets dismissed).
@@ -121,5 +122,6 @@ uncommitted fixes applied in Step 4). Return to Step 2 with the recomputed diff.
   no `Co-Authored-By` lines of any kind.
 - Never push directly to protected branches (protected branches — see the octo guard's list).
 - Never use `--no-verify` or force-push.
-- Fan-out: all four reviewer dispatches go in a **single message** — serial dispatch is not
-  acceptable when parallel execution halves elapsed time.
+- Parallel-first: dispatches that do not consume each other's output MUST go in a single
+  message. Dispatching sequentially what could run concurrently is a defect, not a style
+  choice. Cap ≈10 concurrent lanes; more work than lanes → batch waves.
