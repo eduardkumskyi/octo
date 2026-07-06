@@ -150,6 +150,8 @@ reveal a recurring anti-pattern already present in the lessons store.
 
 This format is binding. Review it like a senior engineer trying to block a risky merge.
 
+**Chat output rule**: in chat, present only the per-repo executive digest — a severity count table (CRITICAL / HIGH / MEDIUM / LOW) plus the must-fix list (finding title + file path, one line each) — and the cross-repo compatibility one-liner when applicable. Write the full report (all findings with evidence, failure modes, fix recommendations, regressions, missing tests) to `.claude/octo/reports/YYYY-MM-DD-audit-<slug>.md`; share the file path in chat.
+
 ### Per-repository section (one section per repo in the matrix)
 
 **Executive summary** — two to five sentences: what changed, how risky it looks, net
@@ -230,3 +232,4 @@ with a brief rationale for each deferral.
   message. Dispatching sequentially what could run concurrently is a defect, not a style
   choice. Cap ≈10 concurrent lanes; more work than lanes → batch waves.
 - Read-only through the report. Nothing is modified unless you select fixes at the final step; pushes are never automatic.
+- Reader-first output: lead with the outcome in one sentence; keep the visible reply short and dev-readable — only what changes the reader's next action. Full detail (complete reports, evidence, logs) goes to a file under `.claude/octo/reports/YYYY-MM-DD-<skill>-<slug>.md` with the path given in chat — never dumped into the conversation.

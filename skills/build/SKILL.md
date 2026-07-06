@@ -156,7 +156,7 @@ to `.claude/octo/run/events.jsonl`, report all failures, and exit.
 
 On gate success:
 1. Run `bash "$OCTO_ROOT/scripts/notify.sh" "octo build" "done: <mission>"`.
-2. Produce the final report as a markdown table (columns: Step | Result) listing every step outcome, followed by an Assumptions list (all [SAFE]/[RISKY] items recorded during the run) and any residual LOW/MEDIUM findings from the review step.
+2. Produce the final report as a markdown table (columns: Step | Result) listing every step outcome. If the Assumptions list or residual findings are long, write the full detail to `.claude/octo/reports/YYYY-MM-DD-build-<slug>.md` and share the path in chat; in chat show only the table, a count of assumptions, and a count of residual findings.
 3. **Offer** to run `/octo:pr` — do **not** auto-create the PR.
 
 Append to `.claude/octo/run/events.jsonl`:
@@ -177,3 +177,4 @@ Append to `.claude/octo/run/events.jsonl`:
   overwrite `.claude/octo/run/state.json` with the final phase, append
   `{"ts": "<ISO>", "type": "blocked", "reason": "<reason>"}` to `.claude/octo/run/events.jsonl`,
   and report.
+- Reader-first output: lead with the outcome in one sentence; keep the visible reply short and dev-readable — only what changes the reader's next action. Full detail (complete reports, evidence, logs) goes to a file under `.claude/octo/reports/YYYY-MM-DD-<skill>-<slug>.md` with the path given in chat — never dumped into the conversation.

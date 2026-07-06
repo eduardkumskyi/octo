@@ -192,14 +192,15 @@ When all milestones are `VERIFIED` or `PARKED`:
 If ALL milestones are `PARKED`, skip the verifier and go straight to the INCOMPLETE report (the INCOMPLETE path's notify applies here too).
 
 1. Dispatch the **verifier** against the contract's Acceptance Criteria in full (not per-milestone).
-2. On acceptance pass, produce the delivery report. Begin with an acceptance-criteria checklist (✅/❌ per criterion from the contract). Then include the following bullet sections:
-   - **What was built** — one paragraph per VERIFIED milestone, linking to the git commit.
+2. On acceptance pass, produce the delivery report. Write the full report to `.claude/octo/reports/YYYY-MM-DD-studio-<slug>.md` (sections: acceptance-criteria checklist, What was built, How to run it, Decision minutes, Parked items, Recorded assumptions, Known limitations); share the path in chat.
+
+   **Chat output** — in chat, show only:
+   - Acceptance-criteria checklist (✅/❌ per criterion from the contract).
    - **How to run it** — exact commands from the project's CLAUDE.md or detected conventions.
-   - **Decision minutes summary** — each D\<n\> entry condensed to one line.
-   - **Parked items** — title, reason, and recommended next step for each.
-   - **Recorded assumptions** — every `type: assumption` event from events.jsonl, with labels.
-   - **Known limitations** — anything discovered during the run that falls outside contract scope,
-     plus any LOW/MEDIUM review residuals carried from milestone inner loops.
+   - **Parked items** — title and reason, one line each.
+
+   Full detail (decision minutes, recorded assumptions, known limitations) is in the report file.
+
    Then: `bash "$OCTO_ROOT/scripts/notify.sh" "octo studio" "delivery ready: <mission>"`;
    append `{"ts":"<ISO>","type":"delivery","mission":"<mission>","milestones_verified":<N>,"milestones_parked":<N>}`
    to `.claude/octo/run/events.jsonl`.
@@ -227,3 +228,4 @@ Change requests become a **new, smaller studio run** — the current run is clos
 - On any blocked event: `bash "$OCTO_ROOT/scripts/notify.sh" "octo studio" "blocked: <reason>"`,
   overwrite `.claude/octo/run/state.json` with the current phase, append
   `{"ts":"<ISO>","type":"blocked","reason":"<reason>"}` to `.claude/octo/run/events.jsonl`, and report.
+- Reader-first output: lead with the outcome in one sentence; keep the visible reply short and dev-readable — only what changes the reader's next action. Full detail (complete reports, evidence, logs) goes to a file under `.claude/octo/reports/YYYY-MM-DD-<skill>-<slug>.md` with the path given in chat — never dumped into the conversation.

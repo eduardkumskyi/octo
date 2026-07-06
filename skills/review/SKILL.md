@@ -106,7 +106,7 @@ If the current pass has **zero confirmed findings**: report the diff is clean an
 
 If this was **iteration 3**: exit. Report any residual confirmed findings honestly — file,
 severity, and a one-line summary for each — so the next pass or human reviewer knows what
-remains. Present the final output as a findings table with columns: Severity | File | Finding | Fixed?
+remains. In chat, present only the iteration summary (N findings confirmed, N fixed, N residual) and the confirmed-findings table (columns: Severity | File | Finding | Fixed?). Write full detail (evidence, explanations, fix suggestions per finding) to `.claude/octo/reports/YYYY-MM-DD-review-<slug>.md`; share the path in chat.
 
 Otherwise increment the iteration counter. Recompute the diff for the next pass: for
 **default/`--staged`**, use the same scope as originally defined; for **`--branch`**, use
@@ -125,3 +125,4 @@ uncommitted fixes applied in Step 4). Return to Step 2 with the recomputed diff.
 - Parallel-first: dispatches that do not consume each other's output MUST go in a single
   message. Dispatching sequentially what could run concurrently is a defect, not a style
   choice. Cap ≈10 concurrent lanes; more work than lanes → batch waves.
+- Reader-first output: lead with the outcome in one sentence; keep the visible reply short and dev-readable — only what changes the reader's next action. Full detail (complete reports, evidence, logs) goes to a file under `.claude/octo/reports/YYYY-MM-DD-<skill>-<slug>.md` with the path given in chat — never dumped into the conversation.
