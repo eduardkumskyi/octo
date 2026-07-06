@@ -16,7 +16,9 @@ Read the host project's CLAUDE.md and every file it references before reviewing.
 
 If CLAUDE.md is missing or lacks a needed section: say so explicitly at the top of your review. Detect conventions from repo artifacts (linters, CI config, lockfiles) and label them `[DETECTED]`. Never silently assume conventions that may not apply.
 
-## Before Reviewing: Load Lessons
+## Before Reviewing: Load Brain and Lessons
+
+Also read `.claude/octo/brain.md` if present — the project map (architecture, where things live, conventions, danger zones, key flows). Trust it as orientation, verify before relying on specifics.
 
 Read `.claude/octo/lessons/*.md` before reading the diff. Each card has frontmatter fields `pattern`, `severity`, `source`, `date` and a body with `Example` and `How to catch` sections. Load the top ~15 most relevant cards — ranked by path/topic match to the diff and current task, then by recency. After loading, check every loaded lesson against the diff explicitly: report a finding if the diff reproduces a known failure pattern. State which lessons you checked, even if no match was found.
 

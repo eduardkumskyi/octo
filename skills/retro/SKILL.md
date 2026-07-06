@@ -77,6 +77,8 @@ Read all cards in `.claude/octo/lessons/`. Perform curator duties:
 
 Print a curation summary: cards added, merged, pruned, and final count.
 
+Update `.claude/octo/brain.md`: append any durable codebase facts surfaced this session and prune stale entries. Brain sections: Architecture / Where things live / Conventions / Danger zones / Key flows. Cap ~150 lines, merge don't duplicate; create the file if absent.
+
 
 ---
 

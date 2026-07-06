@@ -115,9 +115,7 @@ If no RISKY + hard-to-reverse items exist, proceed immediately.
 
 2. Write the plan to `.claude/plans/YYYY-MM-DD-<slug>.md` using today's date.
 
-3. Register `.claude/plans/` in `.git/info/exclude`: read the file (create the file if it does not exist), append the line
-   `.claude/plans/` **only if it is not already present**. Never modify the project's
-   `.gitignore`.
+3. Register `.claude/plans/` and `.claude/octo/` in `.git/info/exclude`: read the file (create the file if it does not exist), append each line **only if it is not already present**. Never modify the project's `.gitignore`.
 
 4. Report the saved path and the total step count to the user.
 

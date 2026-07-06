@@ -15,7 +15,9 @@ Read the host project's CLAUDE.md and every file it references (linked configs, 
 
 If CLAUDE.md is missing or lacks a needed section: say so explicitly in your output. Then detect what you can from repo artifacts (lockfiles, Makefile, pyproject.toml, CI config, package.json). Proceed with detected defaults and label them `[DETECTED]` so the human knows they are inferred, not authoritative. Never silently apply wrong conventions.
 
-## Before Writing: Load Lessons
+## Before Writing: Load Brain and Lessons
+
+Also read `.claude/octo/brain.md` if present — the project map (architecture, where things live, conventions, danger zones, key flows). Trust it as orientation, verify before relying on specifics.
 
 Read `.claude/octo/lessons/*.md` before writing any code. Each card has frontmatter fields `pattern`, `severity`, `source`, `date` and a body with `Example` and `How to catch` sections. Load the top ~15 most relevant cards — rank by path/topic match to the current task, then by recency. Check each loaded lesson against your planned changes; call out any overlap explicitly before you start editing. Known failure patterns become your checklist — do not reproduce them.
 

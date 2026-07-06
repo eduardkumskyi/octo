@@ -66,10 +66,12 @@ a regression test before the fix lands.
 Verify the fix resolves the repro: re-run the regression test and confirm it passes.
 
 
-### Step 5 — Record lesson  ← STOP if nothing to record
+### Step 5 — Record lesson and update brain  ← STOP if nothing to record
 
 Write one lesson card at `.claude/octo/lessons/<kebab-slug>.md` capturing the root cause as a
-reusable anti-pattern. Slug = kebab-case of the `pattern` field. If a card with the same slug
+reusable anti-pattern.
+
+After writing the lesson card, update `.claude/octo/brain.md`: append any durable codebase knowledge learned from this debug session (a module's unexpected behavior, a danger zone, a control flow quirk). Brain sections: Architecture / Where things live / Conventions / Danger zones / Key flows. Cap ~150 lines, merge don't duplicate; create the file if absent. Slug = kebab-case of the `pattern` field. If a card with the same slug
 exists, update its `date` and `## Example` section instead of duplicating.
 
 ```
