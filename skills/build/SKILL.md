@@ -157,7 +157,8 @@ to `.claude/octo/run/events.jsonl`, report all failures, and exit.
 On gate success:
 1. Run `bash "$OCTO_ROOT/scripts/notify.sh" "octo build" "done: <mission>"`.
 2. Produce the final report as a markdown table (columns: Step | Result) listing every step outcome. If the Assumptions list or residual findings are long, write the full detail to `.claude/octo/reports/YYYY-MM-DD-build-<slug>.md` and share the path in chat; in chat show only the table, a count of assumptions, and a count of residual findings.
-3. **Offer** to run `/octo:pr` — do **not** auto-create the PR.
+3. End the chat output with a **Try it** block produced from verifier evidence: the exact command(s) the user can run to see the result working, plus the verifier's observed output (one–two lines). No delivery without a try-it.
+4. **Offer** to run `/octo:pr` — do **not** auto-create the PR.
 
 Append to `.claude/octo/run/events.jsonl`:
 `{"ts": "<ISO>", "type": "complete", "mission": "<task>"}`.

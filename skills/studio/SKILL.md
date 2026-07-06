@@ -201,6 +201,8 @@ If ALL milestones are `PARKED`, skip the verifier and go straight to the INCOMPL
 
    Full detail (decision minutes, recorded assumptions, known limitations) is in the report file.
 
+   End the chat output with a **Try it** block produced from verifier evidence: the exact command(s) the user can run to see the result working, plus the verifier's observed output (one–two lines). No delivery without a try-it.
+
    Then: `bash "$OCTO_ROOT/scripts/notify.sh" "octo studio" "delivery ready: <mission>"`;
    append `{"ts":"<ISO>","type":"delivery","mission":"<mission>","milestones_verified":<N>,"milestones_parked":<N>}`
    to `.claude/octo/run/events.jsonl`.

@@ -94,10 +94,12 @@ Append any new [SAFE]/[RISKY] assumptions from implementer or test-engineer outp
 
 ### Step 8 — Conclude
 
-After all batches are approved and complete, report:
+After all batches are approved and complete, dispatch the **verifier agent** against the plan's acceptance criteria. Then report:
 - Total tasks implemented
 - Aggregate list of files changed
 - Any open items that could not be resolved
+
+End the chat output with a **Try it** block produced from verifier evidence: the exact command(s) the user can run to confirm the result, plus the verifier's observed output (one–two lines). No delivery without a try-it.
 
 
 ---
